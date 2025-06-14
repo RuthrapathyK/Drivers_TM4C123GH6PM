@@ -1,0 +1,24 @@
+{
+  "configurations": [
+  {
+    "cwd": "${workspaceRoot}",
+    "executable": "${workspaceRoot}/build/out.elf",
+    "name": "Debug with OpenOCD",
+    "request": "launch",
+    "type": "cortex-debug",
+    "servertype": "openocd",
+    "configFiles": ["board/ek-tm4c123gxl.cfg"],
+    "searchDir": [],
+    "runToEntryPoint": "main",
+    "showDevDebugOutput": "both",
+    "symbolFiles": [
+      "${workspaceRoot}/build/out.elf"
+   ],
+   "liveWatch": {
+    "enabled": true,
+    "samplesPerSecond": 4
+   },
+    "preLaunchTask": "MyBuild"
+  }
+  ]
+}
