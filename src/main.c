@@ -29,39 +29,40 @@ void main()
   /* Enable clock for uDMA */
   SYSCTL->RCGCDMA |= 1<<0;
 
+  /* Enable the uDMA controller */
+  UDMA->CFG |= 1<<0;
+
+  /* Load the location of the Channel Control Table */
+  UDMA->CTLBASE = (uint32_t)&DMA_Channel_Control_Table;
+
+  /* Configure the Priority of Channel 30 to High */
+  UDMA->PRIOSET |= 1<<30;
+
+  /* Configure Primary for Channel 30 */
+  UDMA->ALTCLR |= 1<<30;
+
+  /* Configure Channel 30 to respond for both Single and Burst requests */
+  UDMA->USEBURSTCLR |= 1<<30;
+
+  /* Configure uDMA controller to recognize requests for this channel */
+  UDMA->REQMASKCLR |= 1<<30;
+
+  /* Configure Control Channel Table for Channel 30 */
+  DMA_Channel_Control_Table[0][30].SrcEnd_Ptr = &Source_Memory[7];
+  DMA_Channel_Control_Table[0][30].DstEnd_Ptr = &Destination_Memory[7];
+  DMA_Channel_Control_Table[0][30].ControlWord |= 2<<30; //32bit Destination address increament
+  DMA_Channel_Control_Table[0][30].ControlWord |= 2<<28; //32-bit Destination data size
+  DMA_Channel_Control_Table[0][30].ControlWord |= 2<<26; //32bit Source address increament
+  DMA_Channel_Control_Table[0][30].ControlWord |= 2<<24; //32-bit Source data size
+  DMA_Channel_Control_Table[0][30].ControlWord |= 3<<14; //Re-arbitrate only after 8 transfers 
+
   /* Enable NVIC interrupt for GPIO Port F */
   NVIC->EN1 |= 1<<14;
 
   while(1)
   {
-    /* Enable the uDMA controller */
-    UDMA->CFG |= 1<<0;
-
-    /* Load the location of the Channel Control Table */
-    UDMA->CTLBASE = (uint32_t)&DMA_Channel_Control_Table;
-
-    /* Configure the Priority  of Channel 30 to High */
-    UDMA->PRIOSET |= 1<<30;
-
-    /* Configure Primary for Channel 30 */
-    UDMA->ALTCLR |= 1<<30;
-
-    /* Configure Channel 30 to respond for both Single and Burst requests*/
-    UDMA->USEBURSTCLR |= 1<<30;
-
-    /* Configure uDMA controller to recognize requests for this channel */
-    UDMA->REQMASKCLR |= 1<<30;
-
-    /* Configure Control Channel Table for Channel 30 */
-    DMA_Channel_Control_Table[0][30].SrcEnd_Ptr = &Source_Memory[7];
-    DMA_Channel_Control_Table[0][30].DstEnd_Ptr = &Destination_Memory[7];
-    DMA_Channel_Control_Table[0][30].ControlWord |= 2<<30; //32bit Destination address increament
-    DMA_Channel_Control_Table[0][30].ControlWord |= 2<<28; //32-bit Destination data size
-    DMA_Channel_Control_Table[0][30].ControlWord |= 2<<26; //32bit Source address increament
-    DMA_Channel_Control_Table[0][30].ControlWord |= 2<<24; //32-bit Source data size
-    DMA_Channel_Control_Table[0][30].ControlWord |= 3<<14; //Re-arbitrate only after 8 transfers 
-    DMA_Channel_Control_Table[0][30].ControlWord |= 2<<0; //Use Auto-request transfer mode
     DMA_Channel_Control_Table[0][30].ControlWord |= 7<<4; //Transfer 8 words
+    DMA_Channel_Control_Table[0][30].ControlWord |= 2<<0; //Use Auto-request transfer mode
 
     /* Enable Channel 30 */
     UDMA->ENASET |= 1<<30;
