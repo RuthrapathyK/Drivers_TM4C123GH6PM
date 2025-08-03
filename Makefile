@@ -6,6 +6,7 @@ OBJDUMP        =  arm-none-eabi-objdump
 SRC_FOLDER     =  src
 INC_FOLDER     =  inc
 BUILD_FOLDER   =  build
+BOARD_FOLDER   =  board
 BUILD_DIR      =  ./$(BUILD_FOLDER)/
 
 OPENOCD_INIT   =  -c 'reset init'
@@ -44,4 +45,4 @@ clean:
 	del /q .\$(BUILD_FOLDER)
 
 flash:build
-	openocd -f C:/MY_FOLDER/04_Learnings/02_RTOS/board/ek-tm4c123gxl.cfg -c init $(OPENOCD_FLASHING_COMMANDS) -c reset -c shutdown
+	openocd -f .\$(BOARD_FOLDER)\ti_ek-tm4c123gxl.cfg -c init $(OPENOCD_FLASHING_COMMANDS) -c reset -c shutdown
