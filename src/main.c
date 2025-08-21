@@ -37,9 +37,9 @@ void main()
   /* Configure Internal Reference Voltage to 1.65V */
   COMP->ACREFCTL |= 0x0B << 0;
 
-  /* Configure Comparator to use Internal Reference Voltage */
+  /* Configure Comparator to use Cn+ as reference Voltage */
   COMP->ACCTL0 &= ~(3<<9);
-  COMP->ACCTL0 |= 2<<9;
+  COMP->ACCTL0 |= 0<<9;
 
   /* Invert the Output ie. V- > V+ = 1 and V- < V+ = 0*/
   COMP->ACCTL0 |= 1<<1;
