@@ -2,6 +2,14 @@
 
 uint8_t comp_status = 0;
 
+void Analog_Comparator_0_handler(void)
+{
+  /* Clear the Interrupt */
+  COMP->ACMIS |= 1<<0;
+
+  /* Read the Comparator Output Value */
+  comp_status = ((COMP->ACSTAT0 >> 1) & 0x01);
+}
 void main()
 {
   /* Enable Clock for Analog Comparator */
@@ -20,11 +28,31 @@ void main()
   GPIOF->AFSEL |= 1<<0; GPIOF->ODR &= ~(1<<0); GPIOF->DEN |= 1<<0; // Configure PF0(C0o) as Comparator Output
   GPIOF->PCTL |= 9<<0;
 
+  /* Enable Resistor Ladder */
+  COMP->ACREFCTL |= 1<<9;
+
+  /* Choose Resistor Ladder Range as High */
+  COMP->ACREFCTL |= 1<<8;
+
   /* Configure Internal Reference Voltage to 1.65V */
-  COMP->ACREFCTL = 0x30C;
+  COMP->ACREFCTL |= 0x0B << 0;
 
   /* Configure Comparator to use Internal Reference Voltage */
-  COMP->ACCTL0 = 0x40C;
+  COMP->ACCTL0 &= ~(3<<9);
+  COMP->ACCTL0 |= 2<<9;
+
+  /* Invert the Output ie. V- > V+ = 1 and V- < V+ = 0*/
+  COMP->ACCTL0 |= 1<<1;
+
+  /* Configure Interrupt generation at Both edges */
+  COMP->ACCTL0 &= ~(3<<2);
+  COMP->ACCTL0 |= 3<<2;
+
+  /* Enable Interrupt of Comparator 0*/
+  COMP->ACINTEN |= 1<<0;
+
+  /* Enable NVIC Interrupt for Analog Comparator 0 - 25 41*/
+  NVIC->EN0 |= 1<<25;
 
   /* Delay for 10us */
   for(uint32_t i = 0; i < 1000000; i++)
@@ -32,7 +60,5 @@ void main()
 
   while(1)
   {
-     /* Read the Comparator Output Value */
-    comp_status = ((COMP->ACSTAT0 >> 1) & 0x01);
   }
 }
