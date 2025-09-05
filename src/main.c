@@ -17,7 +17,46 @@ void UART_sendString(char * str)
     str++;
   }
 }
+void UART_sendNumber(int32_t num)
+{
+  char num_arr[15] = {0};
+  uint8_t first_idx = 0, last_idx = 0;
+  char temp_char = 0;
 
+  /* Check whether the input is non-printable */
+  ASSERT(num != -2147483648)  
+
+  /* Check if the number is negative */
+  if(num < 0)
+  {
+    UART_sendChar('-'); // Send minus character first
+    num *= -1; // Make the number positive
+  }
+
+  do
+  {
+    num_arr[last_idx] = (num % 10)+'0'; // Store the digit as character
+    num /= 10;  // Reove the digit
+    last_idx++;
+  }while(num);
+
+  num_arr[last_idx] = '\0'; // Place NULL character at the end of the string array
+
+  last_idx--; // Point the index to the last character of the num_arr
+
+  /* Swap the Characters */
+  while(last_idx > first_idx)
+  {
+    temp_char = num_arr[first_idx];
+    num_arr[first_idx] = num_arr[last_idx];
+    num_arr[last_idx] = temp_char;
+
+    last_idx--;
+    first_idx++;
+  }
+
+  UART_sendString(num_arr);
+}
 void UART_Init(uint32_t baudrate)
 {
   /* Enable Clock for UART0 module */
@@ -57,11 +96,14 @@ void UART_Init(uint32_t baudrate)
 }
 void main()
 {
+  int32_t counter = 0;
   UART_Init(115200);
 
   while(1)
   {
-    UART_sendString("Hello World\n");
+    UART_sendNumber(counter++);
+    counter %= 100;
+    UART_sendChar('\n');
     delayLoop(1000);
   }
 }
