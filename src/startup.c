@@ -1048,7 +1048,7 @@ void Reset_handler(void)
     //Initialize .data section with initial values at SRAM 
     for(uint32_t i = 0; i < &__e_data - &__s_data; i++)
     {
-        *(((uint8_t *)&__s_data) + i) =*(((uint8_t *)&__e_text) + i);
+        *(((uint8_t *)&__s_data) + i) = *(((uint8_t *)&__e_text) + i);
     }
 
     //Initialize .bss section with 0 at SRAM
@@ -1057,6 +1057,14 @@ void Reset_handler(void)
         *(((uint8_t *)&__s_bss) + i) = 0;
     }
 
-    //Call main
+    // Enable Hardware Floating Point Unit
+    __asm("LDR.W R0, =0xE000ED88"); //CPACR is located at address 0xE000ED88
+    __asm("LDR R1, [R0]"); //Read CPACR
+    __asm("ORR R1, R1, #(0xF << 20)"); //Set bits 20-23 to enable CP10 and CP11 coprocessors
+    __asm("STR R1, [R0]");
+    __asm("DSB");
+    __asm("ISB");
+
+    // Call main
     main();
 }
