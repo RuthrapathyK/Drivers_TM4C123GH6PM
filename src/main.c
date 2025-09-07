@@ -3,54 +3,51 @@
 #include "uart.h"
 #include "nvic.h"
 
-
-
-volatile uint8_t counter = 0;
-
-/**
- * @brief The function is used to create a blocking delay. It used traditional for loop
- * 
- * @param mSec delay time in approximate milli-seconds
- */
-void delayLoop(uint32_t mSec)
-{
-  for (volatile uint32_t i = 0; i < mSec ; i++)
-  {
-    for(volatile uint32_t j =0; j < 500; j++)
-    {
-      __asm("NOP");
-    }
-  }
-}
-
-void UART0_handler(void)
-{
-  /* Clear the Interrupt */
-  UART0->ICR |= (1<<5 | 1<<4); 
-
-  counter++;
-}
+volatile uint32_t convData = 0;
 
 void main()
 {
-  uint8_t rCharacter[20];
 
-  /* Configure UART pins */
+  UART_Init(115200);
   Pin_Config(Port_PA, 0, PA0_U0RX);
   Pin_Config(Port_PA, 1, PA1_U0TX);
+  
+  UART_sendString("Hello World\n");
 
-  /* Initialize UART */
-  UART_Init(115200);
-  UART0->IM |= (1<<5 | 1<<4);// Enable Interrupt from UART module
+  /* Enable ADC0 clock */
+  SYSCTL->RCGCADC |= 1<<0;
 
-  /* Enable NVIC interrupt of UART */
-  NVIC_enableInterrupt(UART_0_IRQ);
+  /* Configure ADC Pin - PE3 as Analog */
+  Pin_Config(Port_PE, 3, PE3_ANALOG_AIN0);
 
-  UART_sendString("UART Initialized\n");
+  /* Disable SS3 Sample Sequencer */
+  ADC0->ACTSS &= ~(1<<3);
+  
+  /* Configure Trigger Event for the sample sequencer - Processor */
+  ADC0->EMUX &= ~(0xF << 12);
+
+  /* Configure Input Source for the Sample Sequencer - AIN0 */
+  ADC0->SSMUX3 &= ~(0xF <<0);
+
+  /* Configure Sample Control Bits - Set End of Sequence bit */
+  ADC0->SSCTL3 |= 1<<1;
+
+  /* Enable The Sample Sequencer - SS3*/
+  ADC0->ACTSS |= (1<<3);
 
   while(1)
   {
-    UART_receiveString(rCharacter);
-    UART_sendString(rCharacter);
+    /* Trigger Sampling in SS3*/
+    ADC0->PSSI |= 1<<3;
+
+    /* Wait till ADC conversion is completed */
+    while(((ADC0->ACTSS >> 16) & 0x01))
+    ;
+
+    /* Read the ADC data*/
+    convData = (ADC0->SSFIFO3 & 0x0FFF);
+
+    UART_sendNumber(convData);
+    UART_sendChar('\n');
   }
 }

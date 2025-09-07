@@ -31,4 +31,6 @@ inline void __attribute__((always_inline))__disable_irq(void)
   __asm("CPSID I");
 }
 
+void delayLoop(uint32_t mSec);
+
 #endif
