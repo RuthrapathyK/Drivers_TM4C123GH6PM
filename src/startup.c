@@ -1048,7 +1048,7 @@ void Reset_handler(void)
     //Initialize .data section with initial values at SRAM 
     for(uint32_t i = 0; i < &__e_data - &__s_data; i++)
     {
-        *(((uint8_t *)&__s_data) + i) =*(((uint8_t *)&__e_text) + i);
+        *(((uint8_t *)&__s_data) + i) = *(((uint8_t *)&__e_text) + i);
     }
 
     //Initialize .bss section with 0 at SRAM

@@ -5,7 +5,7 @@
 
 
 
-uint8_t counter = 0;
+volatile uint8_t counter = 0;
 
 /**
  * @brief The function is used to create a blocking delay. It used traditional for loop

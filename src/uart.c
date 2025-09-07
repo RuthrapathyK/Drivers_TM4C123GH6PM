@@ -1,5 +1,7 @@
 #include "uart.h"
 
+#define SYSTEM_CLOCK_HZ 16000000.0f
+
 /**
  * @brief Initializes UART0 with the specified baud rate.
  *
@@ -14,7 +16,7 @@ void UART_Init(uint32_t baudrate)
   SYSCTL->RCGCUART |= 1<<0;
 
   /* Calculate Baudrate */
-  float Baud_Val = (float)(16000000.0f / (8.0f * baudrate)); // Derive value to be written in Register 
+  float Baud_Val = (float)(SYSTEM_CLOCK_HZ / (8.0f * baudrate)); // Derive value to be written in Register 
   uint16_t Baud_Integer = (uint16_t)Baud_Val; // Derive the Integer part of the Value
   uint8_t Baud_Fraction = (uint8_t)((((float)Baud_Val - (float)Baud_Integer) * 64.0f) + 0.5f); // Derive the Fraction part of the Value
   
@@ -28,8 +30,8 @@ void UART_Init(uint32_t baudrate)
   /* Configure Stopbit, Parity, FIFOs, Word Length */
   UART0->LCRH |= 0x3 << 5;
 
-  /* Set prescaslar to be 8 */
-  UART0->CTL |= (1<<5); // Select UART prescalar as 8
+  /* Set prescaler to be 8 */
+  UART0->CTL |= (1<<5); // Select UART prescaler as 8
 
   /* Select UART module's clock source - System Clock(16MHz) */
   UART0->CC &= ~(0x0F << 0);
@@ -127,7 +129,7 @@ void UART_sendNumber(int32_t num)
  */
 uint8_t UART_receiveChar(void)
 {
-    /* Wait till TX buffer is empty */
+    /* Wait till RX buffer is not empty */
     while(((UART0->FR >> 4) & 0x01))
     ;
     return (UART0->DR & 0xFF);
