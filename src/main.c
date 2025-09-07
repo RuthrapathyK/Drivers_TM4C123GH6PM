@@ -1,7 +1,13 @@
 #include "common.h"
 #include "pinconfig.h"
 #include "uart.h"
+#include "nvic.h"
 
+/**
+ * @brief The function is used to create a blocking delay. It used traditional for loop
+ * 
+ * @param mSec delay time in approximate milli-seconds
+ */
 void delayLoop(uint32_t mSec)
 {
   for (volatile uint32_t i = 0; i < mSec ; i++)
@@ -12,6 +18,12 @@ void delayLoop(uint32_t mSec)
     }
   }
 }
+uint8_t counter = 0;
+void UART0_handler(void)
+{
+  UART0->ICR |= (1<<5 | 1<<4); 
+  counter++;
+}
 
 void main()
 {
@@ -21,8 +33,9 @@ void main()
   Pin_Config(Port_PA, 1, PA1_U0TX);
 
   UART_Init(115200);
-
-  UART_sendString("External Loopback mode\n");
+  UART0->IM |= (1<<5 | 1<<4);
+  NVIC_enableInterrupt(UART_0_IRQ);
+  UART_sendString("UART Initialized\n");
 
   while(1)
   {

@@ -31,9 +31,4 @@ inline void __attribute__((always_inline))__disable_irq(void)
   __asm("CPSID I");
 }
 
-/**
- * @brief The function is used to create a blocking delay. It used traditional for loop
- * 
- * @param mSec delay time in approximate milli-seconds
- */
 #endif
