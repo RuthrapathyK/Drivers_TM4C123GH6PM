@@ -17,8 +17,8 @@ void main()
 {
   uint8_t rCharacter[20];
 
-  pinConfig(Port_PA, 0, PA0_U0RX);
-  pinConfig(Port_PA, 1, PA1_U0TX);
+  Pin_Config(Port_PA, 0, PA0_U0RX);
+  Pin_Config(Port_PA, 1, PA1_U0TX);
 
   UART_Init(115200);
 
@@ -27,7 +27,6 @@ void main()
   while(1)
   {
     UART_receiveString(rCharacter);
-
     UART_sendString(rCharacter);
   }
 }

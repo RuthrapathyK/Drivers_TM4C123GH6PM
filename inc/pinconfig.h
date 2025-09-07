@@ -267,6 +267,6 @@ typedef enum{
 #define PORTPIN_GPIO_FUNCTION   0
 #define PORTPIN_MAX_FUNCTIONALITY 17
 
-void pinConfig(Pincfg_Port_e port, uint8_t pin, uint8_t func);
+void Pin_Config(Pincfg_Port_e port, uint8_t pin, uint8_t func);
 
 #endif

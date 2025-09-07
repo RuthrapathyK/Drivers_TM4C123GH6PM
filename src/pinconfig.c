@@ -1,6 +1,6 @@
 #include "pinconfig.h"
 
-void pinConfig(Pincfg_Port_e port, uint8_t pin, uint8_t func)
+void Pin_Config(Pincfg_Port_e port, uint8_t pin, uint8_t func)
 {
     GPIOA_Type * gpioBase = NULL;
 
@@ -37,12 +37,21 @@ void pinConfig(Pincfg_Port_e port, uint8_t pin, uint8_t func)
 
     if(func == PORTPIN_GPIO_FUNCTION)
     {
-        /* Operations for GPIO */
+        /* Disable Alternate Functionality for that Pin */
+        gpioBase->AFSEL &= ~(1<<pin);
 
+        /* Enable Digital Functionality */
+        gpioBase->AMSEL &= ~(1<<pin);
+        gpioBase->DEN |= 1<<pin;
     }
     else if(func == PORTPIN_ANALOG_FUNCTION)
     {
-        /* Operations for Analog*/
+        /* Disable Alternate Functionality for that Pin */
+        gpioBase->AFSEL &= ~(1<<pin);
+
+        /* Enable Analog Functionality */
+        gpioBase->DEN &= ~(1<<pin);
+        gpioBase->AMSEL |= (1<<pin);
     }
     else /* Alternate Function */
     {
