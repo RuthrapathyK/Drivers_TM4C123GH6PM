@@ -1,5 +1,16 @@
 #include "pinconfig.h"
 
+/**
+ * @brief Configures a pin's function for a given GPIO port.
+ *
+ * This function enables the clock for the selected port, maps the port base address,
+ * and configures the pin as GPIO, analog, or alternate function according to 'func'.
+ * For alternate functions, it sets the AFSEL and PCTL registers appropriately.
+ *
+ * @param port GPIO port (Port_PA, Port_PB, ..., Port_PF)
+ * @param pin  Pin number (0-7)
+ * @param func Function selector (GPIO, analog, or alternate function number)
+ */
 void Pin_Config(Pincfg_Port_e port, uint8_t pin, uint8_t func)
 {
     GPIOA_Type * gpioBase = NULL;
@@ -35,7 +46,8 @@ void Pin_Config(Pincfg_Port_e port, uint8_t pin, uint8_t func)
             break;
     }
 
-    if(func == PORTPIN_GPIO_FUNCTION)
+    /* Configure as digital GPIO */
+    if(func == PORTPIN_GPIO_FUNCTION) 
     {
         /* Disable Alternate Functionality for that Pin */
         gpioBase->AFSEL &= ~(1<<pin);
@@ -44,6 +56,7 @@ void Pin_Config(Pincfg_Port_e port, uint8_t pin, uint8_t func)
         gpioBase->AMSEL &= ~(1<<pin);
         gpioBase->DEN |= 1<<pin;
     }
+    /* Configure as analog input */
     else if(func == PORTPIN_ANALOG_FUNCTION)
     {
         /* Disable Alternate Functionality for that Pin */
@@ -53,7 +66,8 @@ void Pin_Config(Pincfg_Port_e port, uint8_t pin, uint8_t func)
         gpioBase->DEN &= ~(1<<pin);
         gpioBase->AMSEL |= (1<<pin);
     }
-    else /* Alternate Function */
+    /* Alternate Function */
+    else
     {
         /* Select Alternate function for the Pin */
         gpioBase->AFSEL |= 1<<pin;

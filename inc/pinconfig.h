@@ -267,6 +267,17 @@ typedef enum{
 #define PORTPIN_GPIO_FUNCTION   0
 #define PORTPIN_MAX_FUNCTIONALITY 17
 
+/**
+ * @brief Configures a pin's function for a given GPIO port.
+ *
+ * This function enables the clock for the selected port, maps the port base address,
+ * and configures the pin as GPIO, analog, or alternate function according to 'func'.
+ * For alternate functions, it sets the AFSEL and PCTL registers appropriately.
+ *
+ * @param port GPIO port (Port_PA, Port_PB, ..., Port_PF)
+ * @param pin  Pin number (0-7)
+ * @param func Function selector (GPIO, analog, or alternate function number)
+ */
 void Pin_Config(Pincfg_Port_e port, uint8_t pin, uint8_t func);
 
 #endif

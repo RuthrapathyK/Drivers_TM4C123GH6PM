@@ -1,7 +1,13 @@
 #include "uart.h"
 
-extern void delayLoop(uint32_t mSec);
-
+/**
+ * @brief Initializes UART0 with the specified baud rate.
+ *
+ * Configures UART0 for 8-bit, no parity, 1 stop bit, FIFO enabled, and sets the baud rate.
+ * Uses system clock as source and prescaler of 8.
+ *
+ * @param baudrate Desired baud rate (e.g., 115200)
+ */
 void UART_Init(uint32_t baudrate)
 {
   /* Enable Clock for UART0 module */
@@ -32,6 +38,13 @@ void UART_Init(uint32_t baudrate)
   UART0->CTL |= 1<<0;
 }
 
+/**
+ * @brief Sends a single character over UART0.
+ *
+ * Waits until the transmit FIFO is not full, then writes the character.
+ *
+ * @param ch Character to send
+ */
 void UART_sendChar(char ch)
 {
     /* Wait till Transmission is completed */
@@ -40,9 +53,15 @@ void UART_sendChar(char ch)
     UART0->DR = ch;
 }
 
+/**
+ * @brief Sends a null-terminated string over UART0.
+ *
+ * Sends each character in the string using UART_sendChar.
+ *
+ * @param str Pointer to the string to send
+ */
 void UART_sendString(char * str)
 {
-
   while(*str)
   {
     UART_sendChar(*str);
@@ -50,6 +69,13 @@ void UART_sendString(char * str)
   }
 }
 
+/**
+ * @brief Sends a signed 32-bit integer as ASCII characters over UART0.
+ *
+ * Converts the number to a string and sends it using UART_sendString.
+ *
+ * @param num Number to send
+ */
 void UART_sendNumber(int32_t num)
 {
   char num_arr[20] = {0};
@@ -88,9 +114,17 @@ void UART_sendNumber(int32_t num)
     first_idx++;
   }
 
+  /* Send the ASCII converted number String */
   UART_sendString(num_arr);
 }
 
+/**
+ * @brief Receives a single character from UART0.
+ *
+ * Waits until the receive FIFO is not empty, then returns the character.
+ *
+ * @return Received character
+ */
 uint8_t UART_receiveChar(void)
 {
     /* Wait till TX buffer is empty */
@@ -99,10 +133,18 @@ uint8_t UART_receiveChar(void)
     return (UART0->DR & 0xFF);
 }
 
+/**
+ * @brief Receives a string from UART0 until newline.
+ *
+ * Reads characters into strBuf until '\n' is received, then null-terminates the buffer.
+ *
+ * @param strBuf Pointer to buffer for received string
+ */
 void UART_receiveString(uint8_t * strBuf)
 {
     uint8_t rChar = 0;
 
+    /* Receive and store the data in strBuf till \n character is received */
     do{
         rChar = UART_receiveChar();
         *strBuf = rChar;

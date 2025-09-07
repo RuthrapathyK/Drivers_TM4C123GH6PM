@@ -3,6 +3,7 @@
 
 #include "common.h"
 
+
 typedef enum {
     GPIO_Port_A_IRQ = 0,          // 16: GPIO Port A
     GPIO_Port_B_IRQ,              // 17: GPIO Port B
@@ -101,7 +102,24 @@ typedef enum {
     NVIC_IRQ_MAX
 } NVIC_Interrupt_e;
 
+/**
+ * @brief Enables the given interrupt in the NVIC.
+ * 
+ * This function sets the corresponding bit in the appropriate NVIC ENx register
+ * to enable the interrupt specified by intr_num.
+ * 
+ * @param intr_num Interrupt number (see NVIC_Interrupt_e)
+ */
 void NVIC_enableInterrupt(NVIC_Interrupt_e intr_num);
+
+/**
+ * @brief Disables the given interrupt in the NVIC.
+ * 
+ * This function sets the corresponding bit in the appropriate NVIC DISx register
+ * to disable the interrupt specified by intr_num.
+ * 
+ * @param intr_num Interrupt number (see NVIC_Interrupt_e)
+ */
 void NVIC_disableInterrupt(NVIC_Interrupt_e intr_num);
 
 #endif
