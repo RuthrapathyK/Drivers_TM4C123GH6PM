@@ -36,14 +36,4 @@ inline void __attribute__((always_inline))__disable_irq(void)
  * 
  * @param mSec delay time in approximate milli-seconds
  */
-void delayLoop(uint32_t mSec)
-{
-  for (volatile uint32_t i = 0; i < mSec ; i++)
-  {
-    for(volatile uint32_t j =0; j < 500; j++)
-    {
-      __asm("NOP");
-    }
-  }
-}
 #endif

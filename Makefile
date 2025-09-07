@@ -18,16 +18,20 @@ OPENOCD_FLASHING_COMMANDS = $(OPENOCD_INIT) $(OPENOCD_HALT) $(OPENOCD_FLASH) #$(
 VPATH = src;inc;build
 
 # Rules starts here
-build: clean main.o startup.o out.elf out.bin out.hex out.s
+build: clean main.o startup.o uart.o pinconfig.o out.elf out.bin out.hex out.s
 
 # Generate Object Files
 main.o: main.c
 	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $(BUILD_FOLDER)/$@
 startup.o: startup.c
 	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $(BUILD_FOLDER)/$@
+uart.o: uart.c
+	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $(BUILD_FOLDER)/$@
+pinconfig.o: pinconfig.c
+	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $(BUILD_FOLDER)/$@
 
 # Link the object files and generate .map file
-out.elf:$(BUILD_FOLDER)/main.o $(BUILD_FOLDER)/startup.o
+out.elf:$(BUILD_FOLDER)/main.o $(BUILD_FOLDER)/startup.o $(BUILD_FOLDER)/uart.o $(BUILD_FOLDER)/pinconfig.o
 	$(CC) -T linkerscript.ld -nostdlib $^ -o $(BUILD_DIR)$@ -Wl,-Map=$(BUILD_DIR)out.map 
 
 # Generate Binary executable
