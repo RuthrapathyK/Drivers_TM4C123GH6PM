@@ -2,22 +2,32 @@
 #include "pinconfig.h"
 #include "uart.h"
 #include "nvic.h"
+#include "led.h"
 
 #define SAMPLE_SIZE 2000
+
 volatile uint32_t convData[SAMPLE_SIZE] = {0};
 
-uint32_t index = 0;
+uint32_t volatile idx = 0;
+
 void ADC0_Sequence_3_handler(void)
 {
+  /* Toggle Debug LED */
+  LED_RED_TOGGLE;
+
   /* Clear the Interrupt */
   ADC0->ISC |= 1<<3;
 
   /* Read the ADC data*/
-  convData[index] = (ADC0->SSFIFO3 & 0x0FFF);
+  convData[idx++] = (ADC0->SSFIFO3 & 0x0FFF);
 
-  index++;
+  // /* Trigger Sampling in SS3*/
+  // ADC0->PSSI |= 1<<3;
 
-  if(index <= SAMPLE_SIZE)
+  // UART_sendNumber(convData[idx]);
+  // UART_sendChar('\n');
+
+  if(idx < SAMPLE_SIZE)
   {
     /* Trigger Sampling in SS3*/
     ADC0->PSSI |= 1<<3;
@@ -29,6 +39,10 @@ void main()
   UART_Init(115200);
   Pin_Config(Port_PA, 0, PA0_U0RX);
   Pin_Config(Port_PA, 1, PA1_U0TX);
+
+  UART_sendString("Hello World");
+
+  LED_Init(LED_RED);
 
   /* Enable ADC0 clock */
   SYSCTL->RCGCADC |= 1<<0;
@@ -64,14 +78,15 @@ void main()
   while(1)
   {
 
-    if(index > SAMPLE_SIZE)
+    if(idx >= SAMPLE_SIZE)
     {
+      LED_RED_OFF;
       for(uint32_t iter = 0; iter < SAMPLE_SIZE; iter++)
       {
         UART_sendNumber(convData[iter]);
         UART_sendChar('\n');
       }
-      index = 0;
+      idx = 0;
 
       /* Trigger Sampling in SS3*/
       ADC0->PSSI |= 1<<3;
