@@ -3,11 +3,11 @@
 #include "uart.h"
 #include "nvic.h"
 #include "led.h"
+#include "filter.h"
 
 #define SAMPLE_SIZE 2000
 
-volatile uint32_t convData[SAMPLE_SIZE] = {0};
-
+volatile uint16_t convData[SAMPLE_SIZE] = {0};
 uint32_t volatile idx = 0;
 
 void ADC0_Sequence_3_handler(void)
@@ -21,11 +21,6 @@ void ADC0_Sequence_3_handler(void)
   /* Read the ADC data*/
   convData[idx++] = (ADC0->SSFIFO3 & 0x0FFF);
 
-  // /* Trigger Sampling in SS3*/
-  // ADC0->PSSI |= 1<<3;
-
-  // UART_sendNumber(convData[idx]);
-  // UART_sendChar('\n');
 
   if(idx < SAMPLE_SIZE)
   {
@@ -84,6 +79,10 @@ void main()
       for(uint32_t iter = 0; iter < SAMPLE_SIZE; iter++)
       {
         UART_sendNumber(convData[iter]);
+        UART_sendChar(',');
+        
+        /* Send the Moving Average Filtered data */
+        UART_sendNumber(Filter_Moving_Average(convData[iter]));
         UART_sendChar('\n');
       }
       idx = 0;
