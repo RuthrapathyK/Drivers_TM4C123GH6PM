@@ -1,4 +1,5 @@
 #include "uart.h"
+#include "common.h"
 
 #define SYSTEM_CLOCK_HZ 16000000.0f
 

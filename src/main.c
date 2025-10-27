@@ -5,24 +5,37 @@
 #include "led.h"
 #include "filter.h"
 
-#define SAMPLE_SIZE 2000
+#define SAMPLE_SIZE 500
+#define AVERAGE_SIZE 1
+
+#define TESTPIN_HIGH LED_RED_ON
+#define TESTPIN_LOW LED_RED_OFF
 
 volatile uint16_t convData[SAMPLE_SIZE] = {0};
-uint32_t volatile idx = 0;
+uint32_t volatile smp_idx = 0;
+uint32_t volatile avg_idx = 0;
+uint32_t avg_accm = 0;
 
 void ADC0_Sequence_3_handler(void)
 {
-  /* Toggle Debug LED */
-  LED_RED_TOGGLE;
-
   /* Clear the Interrupt */
   ADC0->ISC |= 1<<3;
 
-  /* Read the ADC data*/
-  convData[idx++] = (ADC0->SSFIFO3 & 0x0FFF);
+  if(avg_idx < AVERAGE_SIZE)
+  {
+    avg_accm += ADC0->SSFIFO3 & 0x0FFFu;
+    avg_idx++;
+  }
+  else
+  {
+    /* Read the ADC data*/
+    convData[smp_idx++] = avg_accm / AVERAGE_SIZE;
 
+    avg_accm = 0;
+    avg_idx = 0;
+  }
 
-  if(idx < SAMPLE_SIZE)
+  if(smp_idx < SAMPLE_SIZE)
   {
     /* Trigger Sampling in SS3*/
     ADC0->PSSI |= 1<<3;
@@ -34,9 +47,6 @@ void main()
   UART_Init(115200);
   Pin_Config(Port_PA, 0, PA0_U0RX);
   Pin_Config(Port_PA, 1, PA1_U0TX);
-
-  UART_sendString("Hello World");
-
   LED_Init(LED_RED);
 
   /* Enable ADC0 clock */
@@ -73,22 +83,28 @@ void main()
   while(1)
   {
 
-    if(idx >= SAMPLE_SIZE)
+    if(smp_idx >= SAMPLE_SIZE)
     {
-      LED_RED_OFF;
+      TESTPIN_LOW;
+
+      /* Clear the Index value */
+      smp_idx = 0;
+
+      /* Send the Stored value through UART */
       for(uint32_t iter = 0; iter < SAMPLE_SIZE; iter++)
       {
+        UART_sendString("$$P-auto,");
         UART_sendNumber(convData[iter]);
         UART_sendChar(',');
         
         /* Send the Moving Average Filtered data */
         UART_sendNumber(Filter_Moving_Average(convData[iter]));
-        UART_sendChar('\n');
+        UART_sendChar(';');
       }
-      idx = 0;
 
       /* Trigger Sampling in SS3*/
       ADC0->PSSI |= 1<<3;
+      TESTPIN_HIGH;
     }
 
   }
