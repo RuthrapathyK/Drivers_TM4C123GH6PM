@@ -50,6 +50,7 @@ void UART_Init(uint32_t baudrate)
  */
 void UART_sendChar(char ch)
 {
+    delayLoop(1);
     /* Wait till Transmission is completed */
     while(((UART0->FR >> 3) & 0x01))
     ;

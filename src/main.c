@@ -13,34 +13,45 @@
 
 volatile uint16_t convData[SAMPLE_SIZE] = {0};
 uint32_t volatile smp_idx = 0;
-uint32_t volatile avg_idx = 0;
+uint32_t volatile trg_cnt = 0;
 uint32_t avg_accm = 0;
 
 void ADC0_Sequence_3_handler(void)
 {
+  TESTPIN_HIGH;
   /* Clear the Interrupt */
   ADC0->ISC |= 1<<3;
 
-  if(avg_idx < AVERAGE_SIZE)
-  {
-    avg_accm += ADC0->SSFIFO3 & 0x0FFFu;
-    avg_idx++;
-  }
-  else
-  {
-    /* Read the ADC data*/
-    convData[smp_idx++] = avg_accm / AVERAGE_SIZE;
+  /* Increament the Trigger Counter */
+  trg_cnt++;
 
-    avg_accm = 0;
-    avg_idx = 0;
-  }
-
-  if(smp_idx < SAMPLE_SIZE)
+  /* Check if the Total ADC trigger is within the range */
+  if(trg_cnt < SAMPLE_SIZE * AVERAGE_SIZE)
   {
     /* Trigger Sampling in SS3*/
     ADC0->PSSI |= 1<<3;
   }
 
+  if(trg_cnt % AVERAGE_SIZE == 0)
+  {
+    /* Accumulate the Current ADC raw reading */
+    avg_accm += ADC0->SSFIFO3 & 0x0FFFu;
+
+    /* Average and store it as a sample data */
+    convData[smp_idx] = avg_accm / AVERAGE_SIZE;
+
+    /* Increament the Samples Index */
+    smp_idx++;
+
+    /* Reset the accumulator */
+    avg_accm = 0;
+  }
+  else
+  {
+    /* Accumulate the Current ADC raw reading */
+    avg_accm += ADC0->SSFIFO3 & 0x0FFFu;
+  }
+  TESTPIN_LOW;
 }
 void main()
 {
@@ -83,11 +94,10 @@ void main()
   while(1)
   {
 
-    if(smp_idx >= SAMPLE_SIZE)
+    if(trg_cnt >= SAMPLE_SIZE * AVERAGE_SIZE)
     {
-      TESTPIN_LOW;
-
       /* Clear the Index value */
+      trg_cnt = 0;
       smp_idx = 0;
 
       /* Send the Stored value through UART */
@@ -95,16 +105,15 @@ void main()
       {
         UART_sendString("$$P-auto,");
         UART_sendNumber(convData[iter]);
-        UART_sendChar(',');
-        
-        /* Send the Moving Average Filtered data */
-        UART_sendNumber(Filter_Moving_Average(convData[iter]));
         UART_sendChar(';');
+        
+        // /* Send the Moving Average Filtered data */
+        // UART_sendNumber(Filter_Moving_Average(convData[iter]));
+        // UART_sendChar(';');
       }
 
       /* Trigger Sampling in SS3*/
       ADC0->PSSI |= 1<<3;
-      TESTPIN_HIGH;
     }
 
   }
