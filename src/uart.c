@@ -1,4 +1,5 @@
 #include "uart.h"
+#include "common.h"
 
 #define SYSTEM_CLOCK_HZ 16000000.0f
 
@@ -49,6 +50,7 @@ void UART_Init(uint32_t baudrate)
  */
 void UART_sendChar(char ch)
 {
+    delayLoop(1);
     /* Wait till Transmission is completed */
     while(((UART0->FR >> 3) & 0x01))
     ;
