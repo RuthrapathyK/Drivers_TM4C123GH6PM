@@ -1,7 +1,6 @@
 #include "uart.h"
 #include "common.h"
 
-#define SYSTEM_CLOCK_HZ 16000000.0f
 
 /**
  * @brief Initializes UART0 with the specified baud rate.
@@ -17,7 +16,7 @@ void UART_Init(uint32_t baudrate)
   SYSCTL->RCGCUART |= 1<<0;
 
   /* Calculate Baudrate */
-  float Baud_Val = (float)(SYSTEM_CLOCK_HZ / (8.0f * baudrate)); // Derive value to be written in Register 
+  float Baud_Val = (float)SYSTEM_CLOCK_FREQ / (8.0f * baudrate);
   uint16_t Baud_Integer = (uint16_t)Baud_Val; // Derive the Integer part of the Value
   uint8_t Baud_Fraction = (uint8_t)((((float)Baud_Val - (float)Baud_Integer) * 64.0f) + 0.5f); // Derive the Fraction part of the Value
   
@@ -30,7 +29,7 @@ void UART_Init(uint32_t baudrate)
 
   /* Configure Stopbit, Parity, FIFOs, Word Length */
   UART0->LCRH |= 0x3 << 5;
-
+  
   /* Set prescaler to be 8 */
   UART0->CTL |= (1<<5); // Select UART prescaler as 8
 
@@ -50,9 +49,12 @@ void UART_Init(uint32_t baudrate)
  */
 void UART_sendChar(char ch)
 {
-    delayLoop(1);
+    for(volatile uint32_t j =0; j < 500; j++)
+    {
+      __asm("NOP");
+    }
     /* Wait till Transmission is completed */
-    while(((UART0->FR >> 3) & 0x01))
+    while(((UART0->FR >> 5) & 0x01))
     ;
     UART0->DR = ch;
 }

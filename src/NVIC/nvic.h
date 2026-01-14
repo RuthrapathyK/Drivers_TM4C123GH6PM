@@ -122,4 +122,20 @@ void NVIC_enableInterrupt(NVIC_Interrupt_e intr_num);
  */
 void NVIC_disableInterrupt(NVIC_Interrupt_e intr_num);
 
+/**
+ * @brief Enables all interrupts globally.
+ * 
+ * This function clears the PRIMASK register bit to enable all unmasked interrupts
+ * in the processor by executing the CPSIE I instruction.
+ */
+__INLINE__ void __enable_irq(void);
+
+/**
+ * @brief Disables all interrupts globally.
+ * 
+ * This function sets the PRIMASK register bit to disable all interrupts
+ * in the processor by executing the CPSID I instruction.
+ */
+__INLINE__ void __disable_irq(void);
+
 #endif

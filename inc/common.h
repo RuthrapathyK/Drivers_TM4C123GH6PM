@@ -12,25 +12,19 @@
 #define SYSTICK_TRIGGER SCB->INTCTRL |= 1<<26
 #define SYSTICK_CLEAR   SCB->INTCTRL |= 1<<25
 
+#define __INLINE__ inline __attribute__((always_inline))
+
+#define SYSTEM_CLOCK_FREQ 16000000
+
+void RegWrite_Bits(volatile uint32_t * reg, uint32_t reg_val, uint8_t start_bit, uint8_t bit_length);
+void delayLoop(uint32_t mSec);
+
 #define ASSERT(x) { \
-  if(!(x)) {\
+  if(!(x)){ \
     __asm("BKPT");\
     while(1){ \
     }\
   }\
 }
-
-
-inline void __attribute__((always_inline))__enable_irq(void)
-{
-  __asm("CPSIE I");
-}
-
-inline void __attribute__((always_inline))__disable_irq(void)
-{
-  __asm("CPSID I");
-}
-
-void delayLoop(uint32_t mSec);
 
 #endif

@@ -17,29 +17,31 @@ OPENOCD_FLASHING_COMMANDS = $(OPENOCD_INIT) $(OPENOCD_HALT) $(OPENOCD_FLASH) #$(
 
 VPATH = src;inc;build
 
-# Rules starts here
-build: clean main.o startup.o uart.o pinconfig.o nvic.o common.o led.o filter.o out.elf out.bin out.hex out.s
+# Recursively find all .c files in src/ folder and all subdirectories
+SOURCES := $(shell powershell -Command "Get-ChildItem -Path '$(SRC_FOLDER)' -Filter '*.c' -Recurse | ForEach-Object { Write-Output $$_.FullName }")
+OBJECTS = $(addprefix $(BUILD_FOLDER)/, $(notdir $(SOURCES:.c=.o)))
 
-# Generate Object Files
-main.o: main.c
-	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $(BUILD_FOLDER)/$@
-startup.o: startup.c
-	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $(BUILD_FOLDER)/$@
-uart.o: uart.c
-	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $(BUILD_FOLDER)/$@
-pinconfig.o: pinconfig.c
-	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $(BUILD_FOLDER)/$@
-nvic.o: nvic.c
-	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $(BUILD_FOLDER)/$@
-common.o: common.c
-	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $(BUILD_FOLDER)/$@
-led.o: led.c
-	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $(BUILD_FOLDER)/$@
-filter.o: filter.c
-	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $(BUILD_FOLDER)/$@
+# Generic pattern rule: compile all .c files from any location in src folder and subdirectories
+$(BUILD_FOLDER)/%.o: $(SRC_FOLDER)/%.c
+	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $@
+
+$(BUILD_FOLDER)/%.o: $(SRC_FOLDER)/*/%.c
+	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $@
+
+$(BUILD_FOLDER)/%.o: $(SRC_FOLDER)/*/*/%.c
+	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $@
+
+$(BUILD_FOLDER)/%.o: $(SRC_FOLDER)/*/*/*/%.c
+	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $@
+
+$(BUILD_FOLDER)/%.o: $(SRC_FOLDER)/*/*/*/*/%.c
+	$(CC) $(CFLAGS) -I$(INC_FOLDER) $< -o $@
+
+# Rules starts here
+build: clean $(OBJECTS) out.elf out.bin out.hex out.s
 
 # Link the object files and generate .map file
-out.elf:$(BUILD_FOLDER)/main.o $(BUILD_FOLDER)/startup.o $(BUILD_FOLDER)/uart.o $(BUILD_FOLDER)/pinconfig.o $(BUILD_FOLDER)/nvic.o $(BUILD_FOLDER)/common.o $(BUILD_FOLDER)/led.o $(BUILD_FOLDER)/filter.o
+out.elf: $(OBJECTS)
 	$(CC) -T linkerscript.ld -nostdlib $^ -o $(BUILD_DIR)$@ -Wl,-Map=$(BUILD_DIR)out.map 
 
 # Generate Binary executable
