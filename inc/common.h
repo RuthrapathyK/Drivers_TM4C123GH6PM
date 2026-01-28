@@ -18,7 +18,13 @@
 
 #ifdef CEEDLING_TEST
   #include "unity.h"
-  #define ASSERT(x) TEST_ASSERT(x)
+  extern bool isAsserted;
+  #define ASSERT(x) { \
+    if(!(x)) \
+      isAsserted = true; \
+    else \
+      isAsserted = false; \
+  }
 #else
   #define ASSERT(x) { \
     if(!(x)){ \
@@ -30,6 +36,7 @@
 #endif
 
 void RegWrite_Bits(volatile uint32_t * reg, uint32_t reg_val, uint8_t start_bit, uint8_t bit_length);
+uint32_t RegRead_Bits(volatile uint32_t * reg, uint8_t start_bit, uint8_t bit_length);
 void delayLoop(uint32_t mSec);
 
 #endif

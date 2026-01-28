@@ -32,3 +32,11 @@ void RegWrite_Bits(volatile uint32_t * reg, uint32_t reg_val, uint8_t start_bit,
     /* To avoid Unknown operation while clearing and writing new value, temp variable is used */
     *reg = temp;
 }
+
+uint32_t RegRead_Bits(volatile uint32_t * reg, uint8_t start_bit, uint8_t bit_length)
+{
+    /* Check the Input Parameters */    
+    ASSERT((bit_length <= 32) && (start_bit + bit_length <= 32) && (bit_length > 0));
+
+    return ((*reg >> start_bit) & (uint32_t)(((uint64_t)1 << (uint64_t)bit_length) - (uint64_t)1));
+}
