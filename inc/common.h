@@ -19,12 +19,20 @@
 void RegWrite_Bits(volatile uint32_t * reg, uint32_t reg_val, uint8_t start_bit, uint8_t bit_length);
 void delayLoop(uint32_t mSec);
 
-#define ASSERT(x) { \
-  if(!(x)){ \
-    __asm("BKPT");\
-    while(1){ \
+#ifdef CEEDLING_TEST
+  #define ASSERT(x) { \
+    if(!(x)){ \
+      while(1){ \
+      }\
     }\
-  }\
-}
-
+  }
+#else
+  #define ASSERT(x) { \
+    if(!(x)){ \
+      __asm("BKPT");\
+      while(1){ \
+      }\
+    }\
+  }
+#endif
 #endif
