@@ -1,7 +1,30 @@
 #include "uart.h"
 #include "common.h"
 
+#define UART_MAX_QUEUE_COUNT 12
 
+uint8_t UART_Buffer[UART_MAX_QUEUE_COUNT] = {0};
+
+
+UART_Queue_t UART_Queue = {
+                          .StartIdx = 0,
+                          .Count = 0,
+                          .Buffer = UART_Buffer,
+                          .MaxCount = UART_MAX_QUEUE_COUNT
+                          };
+
+void UART0_handler(void)
+{
+  /* Check for Overflow */
+  if(UART_Queue.Count >= UART_Queue.MaxCount)
+    ASSERT(0);
+
+  /* Read Received Data and Clears Interrupt */
+  UART_Queue.Buffer[(UART_Queue.StartIdx + UART_Queue.Count) % UART_Queue.MaxCount] = UART0->DR;
+
+  /* Increament Queue Counter */
+  UART_Queue.Count++;
+}
 /**
  * @brief Initializes UART0 with the specified baud rate.
  *
@@ -13,7 +36,7 @@
 void UART_Init(uint32_t baudrate)
 {
   /* Enable Clock for UART0 module */
-  SYSCTL->RCGCUART |= 1<<0;
+  RegWrite_Bits(&SYSCTL->RCGCUART, 1, 0, 1);
 
   /* Calculate Baudrate */
   float Baud_Val = (float)SYSTEM_CLOCK_FREQ / (8.0f * baudrate);
@@ -21,23 +44,26 @@ void UART_Init(uint32_t baudrate)
   uint8_t Baud_Fraction = (uint8_t)((((float)Baud_Val - (float)Baud_Integer) * 64.0f) + 0.5f); // Derive the Fraction part of the Value
   
   /* Disable UART */
-  UART0->CTL &= ~(1<<0);
-  
+  RegWrite_Bits(&UART0->CTL, 0, 0, 1);
+
   /* Write the Baudrate */
-  UART0->IBRD = Baud_Integer;
-  UART0->FBRD = Baud_Fraction;
+  RegWrite_Bits(&UART0->IBRD, Baud_Integer, 0, 16);
+  RegWrite_Bits(&UART0->FBRD, Baud_Fraction, 0, 6);
 
   /* Configure Stopbit, Parity, FIFOs, Word Length */
-  UART0->LCRH |= 0x3 << 5;
+  RegWrite_Bits(&UART0->LCRH, 3, 5, 2);
   
   /* Set prescaler to be 8 */
-  UART0->CTL |= (1<<5); // Select UART prescaler as 8
+  RegWrite_Bits(&UART0->CTL, 1, 5, 1); // Select UART prescaler as 8
 
   /* Select UART module's clock source - System Clock(16MHz) */
-  UART0->CC &= ~(0x0F << 0);
+  RegWrite_Bits(&UART0->CC, 0, 0, 4);
+
+  /* Define Interrupt Masks - Receive Interrupt Mask */
+  RegWrite_Bits(&UART0->IM, 1, 4, 1);
 
   /* Enable UART */
-  UART0->CTL |= 1<<0;
+  RegWrite_Bits(&UART0->CTL, 1, 0, 1);
 }
 
 /**
@@ -49,10 +75,6 @@ void UART_Init(uint32_t baudrate)
  */
 void UART_sendChar(char ch)
 {
-    for(volatile uint32_t j =0; j < 500; j++)
-    {
-      __asm("NOP");
-    }
     /* Wait till Transmission is completed */
     while(((UART0->FR >> 5) & 0x01))
     ;

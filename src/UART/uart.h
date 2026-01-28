@@ -3,6 +3,13 @@
 
 #include "common.h"
 
+typedef struct{
+  uint32_t StartIdx;
+  uint32_t Count;
+  uint8_t *Buffer;
+  uint32_t MaxCount;
+}UART_Queue_t;
+
 /**
  * @brief Initializes UART0 with the specified baud rate.
  *

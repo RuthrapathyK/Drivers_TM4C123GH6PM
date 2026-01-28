@@ -1,6 +1,9 @@
 #include "common.h"
 #include "../src/UART/uart.h"
 #include "../src/PinMux/pinconfig.h"
+#include "../src/NVIC/nvic.h"
+
+extern UART_Queue_t UART_Queue;
 
 void BoardPins_Init(void)
 {
@@ -10,23 +13,28 @@ void BoardPins_Init(void)
 void main()
 {
   UART_Init(115200);
-
+  NVIC_enableInterrupt(UART_0_IRQ);
   BoardPins_Init();
+  __enable_irq();
 
   while(1)
   {
-    /* Receive Character in UART */
-    uint8_t ch = 0;
-
-    /* Wait till RX buffer is not empty */
-    while(((UART0->FR >> 4) & 0x01))
-    ;
-
-    ch = UART0->DR;
-    if(((ch >> 8) & 0x0F) != 0)
-      ASSERT(0);
-
     /* Sendback the Received Character */
-    UART_sendChar(ch);    
+    while(UART_Queue.Count)
+    {
+
+      delayLoop(10);
+      /* Transmit the Received Character */
+      UART_sendChar(UART_Queue.Buffer[UART_Queue.StartIdx]);
+
+      /* Increament the Start Index */
+      UART_Queue.StartIdx++;
+
+      /* Roundoff the Start Index */
+      UART_Queue.StartIdx %=  UART_Queue.MaxCount;
+
+      /* Reduce the Count Value */
+      UART_Queue.Count--;
+    }
   }
 }
