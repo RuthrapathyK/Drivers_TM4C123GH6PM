@@ -16,8 +16,7 @@ void tearDown(void)
 }
 
 void test_common_0(void)
-{
-    
+{   
     RegWrite_Bits(&regVal, 0, 0, 32);
     TEST_ASSERT_EQUAL_UINT32(0x0000000, regVal);
 }

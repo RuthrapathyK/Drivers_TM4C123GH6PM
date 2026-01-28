@@ -16,16 +16,9 @@
 
 #define SYSTEM_CLOCK_FREQ 16000000
 
-void RegWrite_Bits(volatile uint32_t * reg, uint32_t reg_val, uint8_t start_bit, uint8_t bit_length);
-void delayLoop(uint32_t mSec);
-
 #ifdef CEEDLING_TEST
-  #define ASSERT(x) { \
-    if(!(x)){ \
-      while(1){ \
-      }\
-    }\
-  }
+  #include "unity.h"
+  #define ASSERT(x) TEST_ASSERT(x)
 #else
   #define ASSERT(x) { \
     if(!(x)){ \
@@ -35,4 +28,8 @@ void delayLoop(uint32_t mSec);
     }\
   }
 #endif
+
+void RegWrite_Bits(volatile uint32_t * reg, uint32_t reg_val, uint8_t start_bit, uint8_t bit_length);
+void delayLoop(uint32_t mSec);
+
 #endif
