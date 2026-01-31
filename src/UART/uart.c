@@ -20,10 +20,51 @@ void UART0_handler(void)
     ASSERT(0);
 
   /* Read Received Data and Clears Interrupt */
-  UART_Queue.Buffer[(UART_Queue.StartIdx + UART_Queue.Count) % UART_Queue.MaxCount] = UART0->DR;
+  UART_Queue.Buffer[(UART_Queue.StartIdx + UART_Queue.Count) % UART_Queue.MaxCount] = RegRead_Bits(&UART0->DR, 0, 12);
 
   /* Increament Queue Counter */
   UART_Queue.Count++;
+}
+
+static UART0_Type* UART_getBase(UART_Module_e mod)
+{
+  /* Check Preconditions */
+  ASSERT(mod < UART_Module_Max);
+
+  UART0_Type * retval = 0;
+
+  /* Get Base Address of the corresponding UART module */
+  switch(mod)
+  {
+    case UART_0:
+        retval = (UART0_Type *)UART0_BASE;
+        break;
+    case UART_1:
+        retval = (UART0_Type *)UART1_BASE;
+        break;
+    case UART_2:
+        retval = (UART0_Type *)UART2_BASE;
+        break;
+    case UART_3:
+        retval = (UART0_Type *)UART3_BASE;
+        break;
+    case UART_4:
+        retval = (UART0_Type *)UART4_BASE;
+        break;
+    case UART_5:
+        retval = (UART0_Type *)UART5_BASE;
+        break;
+    case UART_6:
+        retval = (UART0_Type *)UART6_BASE;
+        break;
+    case UART_7:
+        retval = (UART0_Type *)UART7_BASE;
+        break;
+    default:
+        ASSERT(0);
+  }
+
+  return retval;
 }
 /**
  * @brief Initializes UART0 with the specified baud rate.
@@ -33,10 +74,21 @@ void UART0_handler(void)
  *
  * @param baudrate Desired baud rate (e.g., 115200)
  */
-void UART_Init(uint32_t baudrate)
+void UART_Init(UART_Module_e mod, uint32_t baudrate)
 {
+  ASSERT((mod < UART_Module_Max) && (baudrate > 0));
+
+  UART0_Type * uart_base = 0;
+
   /* Enable Clock for UART0 module */
-  RegWrite_Bits(&SYSCTL->RCGCUART, 1, 0, 1);
+  RegWrite_Bits(&SYSCTL->RCGCUART, 1, mod, 1);
+
+  /* Wait till UART module is Enabled */
+  while(!RegRead_Bits(&SYSCTL->PRUART, mod, 1))
+  ;
+
+  /* Get the Base Address based on Module */
+  uart_base = UART_getBase(mod);
 
   /* Calculate Baudrate */
   float Baud_Val = (float)SYSTEM_CLOCK_FREQ / (8.0f * baudrate);
@@ -44,26 +96,26 @@ void UART_Init(uint32_t baudrate)
   uint8_t Baud_Fraction = (uint8_t)((((float)Baud_Val - (float)Baud_Integer) * 64.0f) + 0.5f); // Derive the Fraction part of the Value
   
   /* Disable UART */
-  RegWrite_Bits(&UART0->CTL, 0, 0, 1);
+  RegWrite_Bits(&uart_base->CTL, 0, 0, 1);
 
   /* Write the Baudrate */
-  RegWrite_Bits(&UART0->IBRD, Baud_Integer, 0, 16);
-  RegWrite_Bits(&UART0->FBRD, Baud_Fraction, 0, 6);
+  RegWrite_Bits(&uart_base->IBRD, Baud_Integer, 0, 16);
+  RegWrite_Bits(&uart_base->FBRD, Baud_Fraction, 0, 6);
 
   /* Configure Stopbit, Parity, FIFOs, Word Length */
-  RegWrite_Bits(&UART0->LCRH, 3, 5, 2);
+  RegWrite_Bits(&uart_base->LCRH, 3, 5, 2);
   
   /* Set prescaler to be 8 */
-  RegWrite_Bits(&UART0->CTL, 1, 5, 1); // Select UART prescaler as 8
+  RegWrite_Bits(&uart_base->CTL, 1, 5, 1); // Select UART prescaler as 8
 
   /* Select UART module's clock source - System Clock(16MHz) */
-  RegWrite_Bits(&UART0->CC, 0, 0, 4);
+  RegWrite_Bits(&uart_base->CC, 0, 0, 4);
 
   /* Define Interrupt Masks - Receive Interrupt Mask */
-  RegWrite_Bits(&UART0->IM, 1, 4, 1);
+  RegWrite_Bits(&uart_base->IM, 1, 4, 1);
 
   /* Enable UART */
-  RegWrite_Bits(&UART0->CTL, 1, 0, 1);
+  RegWrite_Bits(&uart_base->CTL, 1, 0, 1);
 }
 
 /**

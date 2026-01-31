@@ -12,9 +12,15 @@ void BoardPins_Init(void)
 }
 void main()
 {
-  UART_Init(115200);
-  NVIC_enableInterrupt(UART_0_IRQ);
+
+  /* Init UART */
+  UART_Init(UART_0, 115200);
+
+  /* Init the Pin Configurations */
   BoardPins_Init();
+
+  /* Init Interrupts */
+  NVIC_enableInterrupt(UART_0_IRQ);
   __enable_irq();
 
   while(1)

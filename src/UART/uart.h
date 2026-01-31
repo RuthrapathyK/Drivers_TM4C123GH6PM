@@ -10,6 +10,34 @@ typedef struct{
   uint32_t MaxCount;
 }UART_Queue_t;
 
+typedef enum{
+  UART_0,
+  UART_1,
+  UART_2,
+  UART_3,
+  UART_4,
+  UART_5,
+  UART_6,
+  UART_7,
+  UART_Module_Max
+}UART_Module_e;
+
+typedef enum{
+  UART_Even_Parity,
+  UART_Odd_Parity,
+  UART_No_Parity
+}UART_Parity_e;
+
+typedef enum{
+  UART_StopBit_One,
+  UART_StopBit_Two
+}UART_StopBit_e;
+
+typedef struct{
+    uint32_t UART_BaudRate;
+    UART_StopBit_e UART_StopBit;
+    UART_Parity_e UART_Parity;
+}UART_config_t;
 /**
  * @brief Initializes UART0 with the specified baud rate.
  *
@@ -18,7 +46,7 @@ typedef struct{
  *
  * @param baudrate Desired baud rate (e.g., 115200)
  */
-void UART_Init(uint32_t baudrate);
+void UART_Init(UART_Module_e mod, uint32_t baudrate);
 
 /**
  * @brief Sends a single character over UART0.
