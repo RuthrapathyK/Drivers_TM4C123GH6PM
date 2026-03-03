@@ -2,8 +2,12 @@
 #include "../src/UART/uart.h"
 #include "../src/PinMux/pinconfig.h"
 #include "../src/NVIC/nvic.h"
+#include "../src/Queue/queue.h"
 
-extern UART_Queue_t UART_Queue;
+#define UART_MAX_QUEUE_COUNT 20
+
+uint16_t UART_QBuffer[UART_MAX_QUEUE_COUNT] = {0};
+Queue_t UART_QHandler;
 
 void BoardPins_Init(void)
 {
@@ -16,6 +20,9 @@ void main()
   /* Init UART */
   UART_Init(UART_0, 115200);
 
+  /* Initialize the Queue for UART */
+  Queue_Init(&UART_QHandler, (uint8_t *)UART_QBuffer, sizeof(UART_QBuffer[0]), sizeof(UART_QBuffer) / sizeof(UART_QBuffer[0]));
+
   /* Init the Pin Configurations */
   BoardPins_Init();
 
@@ -26,16 +33,17 @@ void main()
   while(1)
   {
     /* Sendback the Received Character */
-    while(UART_Queue.pIdx != UART_Queue.rIdx)
+    while(Queue_isEmpty(&UART_QHandler) == Queue_NotEmpty)
     {
-
-      delayLoop(10);
-
-      /* Increament the Start Index */
-      UART_Queue.pIdx = (UART_Queue.pIdx + 1) % UART_MAX_QUEUE_COUNT;
+      /* Extract Data from Queue*/
+      uint16_t received_char = 0;
+      Queue_Dequeue(&UART_QHandler, (uint8_t *)&received_char);
 
       /* Transmit the Received Character */
-      UART_sendChar(UART_Queue.Buffer[UART_Queue.pIdx]);
+      UART_sendChar((received_char & 0xFF));      
+      
+      /* Intentional Delay*/
+      delayLoop(100);
     }
   }
 }

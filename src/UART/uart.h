@@ -2,15 +2,6 @@
 #define __UART_H
 
 #include "common.h"
-
-#define UART_MAX_QUEUE_COUNT 10
-
-typedef struct{
-  int32_t rIdx;
-  int32_t pIdx;
-  uint8_t *Buffer;
-}UART_Queue_t;
-
 typedef enum{
   UART_0,
   UART_1,
