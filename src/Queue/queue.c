@@ -2,12 +2,11 @@
 
 static void Queue_getDefaultConfig(Queue_t *inst)
 {
-    inst->eIdx = -1;
-    inst->dIdx = -1;
-    inst->QBuff = NULL;
-    inst->QBuff_Max = 0;
+    inst->eIdx = 0;
+    inst->dIdx = 0;
+    inst->eCount = 0;
+    inst->dCount = 0;
     inst->QOverflow = Queue_NoOverflow;
-    inst->QBuff_IdxSize = 0;
 }
 
 void Queue_Init(Queue_t *inst, uint8_t *pBuf, uint32_t IdxSize, uint32_t IdxMax)
@@ -23,38 +22,66 @@ void Queue_Init(Queue_t *inst, uint8_t *pBuf, uint32_t IdxSize, uint32_t IdxMax)
 
 void Queue_Enqueue(Queue_t *inst, uint8_t *InData)
 {
-  /* Increament Enqueuing Index */
-  inst->eIdx = (inst->eIdx + 1) % inst->QBuff_Max;
-
   /* Check for Overflow */
-  if(inst->dIdx == inst->eIdx)
+  if(Queue_isFull(inst) == Queue_Full)
     Queue_setOverflow_State(inst, Queue_Overflow);
+  else
+    inst->eCount++; // Increment the Enqueuing Count also - Count will be used to detect whether the Buffer is full or empty
 
   /* Load the Queue with all Enqueued bytes */
   for(uint32_t byteIdx = 0; byteIdx < inst->QBuff_IdxSize; byteIdx++)
   {
     inst->QBuff[(inst->eIdx * inst->QBuff_IdxSize)+ byteIdx] = InData[byteIdx];
   }
+
+  /* Increment Enqueuing Index */
+  inst->eIdx = (inst->eIdx + 1) % inst->QBuff_Max;
+  
 }
 
 void Queue_Dequeue(Queue_t *inst , uint8_t *OutData)
 {
-    /* Increament the Dequeuing Index */
-    inst->dIdx = (inst->dIdx + 1) % inst->QBuff_Max;
+    /* Increment the Dequeuing Count also - Count will be used to detect whether the Buffer is full or empty */
+    inst->dCount++;
 
     /* Load the Dequeued data to the Out Variable */
     for(uint32_t byteIdx = 0; byteIdx < inst->QBuff_IdxSize; byteIdx++)
     {
         OutData[byteIdx] = inst->QBuff[(inst->dIdx * inst->QBuff_IdxSize)+ byteIdx];
     }
+
+    /* Increament the Dequeuing Index */
+    inst->dIdx = (inst->dIdx + 1) % inst->QBuff_Max;
 }
 
-Queue_State Queue_isEmpty(Queue_t *inst)
+int32_t Queue_totalOccupied_Index(Queue_t *inst)
+{
+    return (inst->eCount - inst->dCount);
+}
+
+Queue_Emptyness_e Queue_isEmpty(Queue_t *inst)
 {
     /* Check if Queue is Empty or Not */
-    return (inst->dIdx == inst->eIdx) ? Queue_Empty : Queue_NotEmpty;
+    return Queue_totalOccupied_Index(inst) == 0 ? Queue_Empty : Queue_NotEmpty;
 }
 
+Queue_Fullness_e Queue_isFull(Queue_t *inst)
+{
+    /* Check if Queue is Full or Not */
+    return Queue_totalOccupied_Index(inst) >= inst->QBuff_Max ? Queue_Full : Queue_NotFull;
+}
+
+void Queue_fullFlush(Queue_t *inst)
+{
+    /* Load Default Configuration of a Queue */
+    Queue_getDefaultConfig(inst);
+
+    /* Clear all Bytes in the Buffer to 0 */
+    for(uint32_t iter = 0; iter < (inst->QBuff_IdxSize * inst->QBuff_Max); iter++)
+    {
+        inst->QBuff[iter] = 0;
+    } 
+}
 void Queue_setOverflow_State(Queue_t *inst, Queue_Overflow_state state)
 {
     inst->QOverflow = state;
