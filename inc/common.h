@@ -7,6 +7,11 @@
 #include "arm_cortex_m4f.h"
 #include "TM4C123GH6PM.h"
 
+#define ENABLED   1
+#define DISABLED  0
+
+#define RTOS_ENABLED ENABLED
+
 #define PENDSV_TRIGGER  SCB->INTCTRL |= 1<<28
 #define PENDSV_CLEAR    SCB->INTCTRL |= 1<<27
 #define SYSTICK_TRIGGER SCB->INTCTRL |= 1<<26

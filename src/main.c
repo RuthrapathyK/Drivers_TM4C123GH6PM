@@ -26,21 +26,16 @@ void main()
   while(1)
   {
     /* Sendback the Received Character */
-    while(UART_Queue.Count)
+    while(UART_Queue.pIdx != UART_Queue.rIdx)
     {
 
       delayLoop(10);
-      /* Transmit the Received Character */
-      UART_sendChar(UART_Queue.Buffer[UART_Queue.StartIdx]);
 
       /* Increament the Start Index */
-      UART_Queue.StartIdx++;
+      UART_Queue.pIdx = (UART_Queue.pIdx + 1) % UART_MAX_QUEUE_COUNT;
 
-      /* Roundoff the Start Index */
-      UART_Queue.StartIdx %=  UART_Queue.MaxCount;
-
-      /* Reduce the Count Value */
-      UART_Queue.Count--;
+      /* Transmit the Received Character */
+      UART_sendChar(UART_Queue.Buffer[UART_Queue.pIdx]);
     }
   }
 }

@@ -1,29 +1,27 @@
 #include "uart.h"
 #include "common.h"
 
-#define UART_MAX_QUEUE_COUNT 12
-
 uint8_t UART_Buffer[UART_MAX_QUEUE_COUNT] = {0};
 
 
 UART_Queue_t UART_Queue = {
-                          .StartIdx = 0,
-                          .Count = 0,
+                          .rIdx = -1,
+                          .pIdx = -1,
                           .Buffer = UART_Buffer,
-                          .MaxCount = UART_MAX_QUEUE_COUNT
                           };
 
 void UART0_handler(void)
 {
+  /* Increament Queue Counter */
+  UART_Queue.rIdx = (UART_Queue.rIdx + 1) % UART_MAX_QUEUE_COUNT;
+
   /* Check for Overflow */
-  if(UART_Queue.Count >= UART_Queue.MaxCount)
+  if(UART_Queue.pIdx == UART_Queue.rIdx)
     ASSERT(0);
 
   /* Read Received Data and Clears Interrupt */
-  UART_Queue.Buffer[(UART_Queue.StartIdx + UART_Queue.Count) % UART_Queue.MaxCount] = RegRead_Bits(&UART0->DR, 0, 12);
+  UART_Queue.Buffer[UART_Queue.rIdx] = RegRead_Bits(&UART0->DR, 0, 12);
 
-  /* Increament Queue Counter */
-  UART_Queue.Count++;
 }
 
 static UART0_Type* UART_getBase(UART_Module_e mod)
