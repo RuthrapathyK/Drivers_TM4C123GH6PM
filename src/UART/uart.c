@@ -307,7 +307,8 @@ void UART_sendChar_NonBlocking(Queue_t *inst, char * str)
   
   while(*str)
   {
-    if(isFirstData == true)
+    /* Check if previous Transaction is completed and Send First data directly */
+    if((isFirstData == true) && (Queue_isEmpty(inst) == Queue_Empty))
     {
       isFirstData = false;
 
@@ -327,7 +328,7 @@ void UART_sendChar_NonBlocking(Queue_t *inst, char * str)
     }
     else
     {
-      /* Wait till Queue has some Empty space */
+      /* Wait till Previous Transaction is completed or Queue has some Empty space*/
     }
   }
 }
