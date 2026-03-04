@@ -35,7 +35,7 @@ void Queue_Dequeue(Queue_t *inst , uint8_t *OutData);
 Queue_Emptyness_e Queue_isEmpty(Queue_t *inst);
 Queue_Fullness_e Queue_isFull(Queue_t *inst);
 void Queue_fullFlush(Queue_t *inst);
-int32_t Queue_totalOccupied_Index(Queue_t *inst);
+int32_t Queue_TotalFilledIndex(Queue_t *inst);
 void Queue_setOverflow_State(Queue_t *inst, Queue_Overflow_state state);
 Queue_Overflow_state Queue_getOverflow_State(Queue_t *inst);
 

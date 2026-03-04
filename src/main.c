@@ -4,7 +4,7 @@
 #include "../src/NVIC/nvic.h"
 #include "../src/Queue/queue.h"
 
-#define UART_MAX_QUEUE_COUNT 10
+#define UART_MAX_QUEUE_COUNT 20
 
 uint16_t UART_QBuffer[UART_MAX_QUEUE_COUNT] = {0};
 Queue_t UART_QHandler;
@@ -42,12 +42,12 @@ void main()
       /* Transmit the Received Character */
       UART_sendChar((received_char & 0xFF));      
       
-      // if(Queue_getOverflow_State(&UART_QHandler) == Queue_Overflow)
-      // {
-      //   //Queue_fullFlush(&UART_QHandler);
-      //   Queue_setOverflow_State(&UART_QHandler, Queue_NoOverflow);
-      //   UART_sendString("\nOverFlow Occured\n");
-      // }
+      if(Queue_getOverflow_State(&UART_QHandler) == Queue_Overflow)
+      {
+        //Queue_fullFlush(&UART_QHandler);
+        Queue_setOverflow_State(&UART_QHandler, Queue_NoOverflow);
+        UART_sendString("\nOverFlow Occured\n");
+      }
 
       /* Intentional Delay*/
       delayLoop(1000);
