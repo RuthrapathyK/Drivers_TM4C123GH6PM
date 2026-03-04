@@ -2,6 +2,19 @@
 #define __UART_H
 
 #include "common.h"
+#include "../src/Queue/queue.h"
+
+#define UART_ISR_EVT_CTS_MODEM          0x00000002U
+#define UART_ISR_EVT_RECEIVE            0x00000010U
+#define UART_ISR_EVT_TRANSMIT           0x00000020U
+#define UART_ISR_EVT_RECEIVE_TIMEOUT    0x00000040U
+#define UART_ISR_EVT_FRAME_ERROR        0x00000080U
+#define UART_ISR_EVT_PARITY_ERROR       0x00000100U
+#define UART_ISR_EVT_BREAK_ERROR        0x00000200U
+#define UART_ISR_EVT_OVERRUN_ERROR      0x00000400U
+#define UART_ISR_EVT_9BIT_MODE          0x00001000U
+
+
 typedef enum{
   UART_0,
   UART_1,
@@ -84,5 +97,7 @@ uint8_t UART_receiveChar(void);
  * @param strBuf Pointer to buffer for received string
  */
 void UART_receiveString(uint8_t * strBuf);
+
+void UART_sendChar_NonBlocking(Queue_t *inst, char * str);
 
 #endif

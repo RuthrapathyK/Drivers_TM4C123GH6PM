@@ -2,15 +2,79 @@
 #include "common.h"
 #include "../src/Queue/queue.h"
 
-extern Queue_t UART_QHandler;
+extern Queue_t UART_RX_QHandler;
+extern Queue_t UART_TX_QHandler;
 
-void UART0_handler(void)
+void UART_RxHandler(void)
 {
   /* Read Data and Clear Interrupt */
   uint16_t read_val = RegRead_Bits(&UART0->DR, 0, 12);
 
   /* Add it to Queue for processing */
-  Queue_Enqueue(&UART_QHandler, (uint8_t *)&read_val);
+  Queue_Enqueue(&UART_RX_QHandler, (uint8_t *)&read_val);
+}
+
+void UART_TxHandler(void)
+{
+  if(Queue_isEmpty(&UART_TX_QHandler) == Queue_NotEmpty)
+  {
+    uint8_t ch = 0;
+    
+    /* Dequeue Data that needs to be sent */
+    Queue_Dequeue(&UART_TX_QHandler, &ch);
+
+    /* Send Data by writting to the Register */
+    UART0->DR = ch;
+  }
+  else
+  {
+    /* No Transmission of Next Data as no data is available in Queue */
+  }
+
+}
+
+void UART0_handler(void)
+{
+  /* Read the UART event which caused the Interrupt *///UART Masked Interrupt Status (UARTMIS) register
+  uint16_t isr_status = RegRead_Bits(&UART0->MIS, 0, 13);
+
+  /* Check which Event has occured and Handle accordingly */
+  switch(isr_status)
+  {
+    case UART_ISR_EVT_RECEIVE:
+          RegWrite_Bits(&UART0->ICR, 1, 4, 1); // Clear the Interrupt
+          UART_RxHandler();
+          break;
+
+    case UART_ISR_EVT_TRANSMIT:
+          RegWrite_Bits(&UART0->ICR, 1, 5, 1); // Clear the Interrupt
+          UART_TxHandler();
+          break;
+
+    case UART_ISR_EVT_FRAME_ERROR:
+          RegWrite_Bits(&UART0->ICR, 1, 7, 1); // Clear the Interrupt
+          ASSERT(0);
+          break;
+    
+    case UART_ISR_EVT_PARITY_ERROR:
+          RegWrite_Bits(&UART0->ICR, 1, 8, 1); // Clear the Interrupt
+          ASSERT(0);
+          break;
+
+    case UART_ISR_EVT_BREAK_ERROR:
+          RegWrite_Bits(&UART0->ICR, 1, 9, 1); // Clear the Interrupt
+          ASSERT(0);
+          break;
+
+    case UART_ISR_EVT_OVERRUN_ERROR:
+          RegWrite_Bits(&UART0->ICR, 1, 10, 1); // Clear the Interrupt
+          ASSERT(0);
+          break;
+
+    default:
+          ASSERT(0);
+          break;
+  }
 }
 
 static UART0_Type* UART_getBase(UART_Module_e mod)
@@ -74,6 +138,14 @@ void UART_Init(UART_Module_e mod, uint32_t baudrate)
   while(!RegRead_Bits(&SYSCTL->PRUART, mod, 1))
   ;
 
+  /* Reset the UART0 module */
+  RegWrite_Bits(&SYSCTL->SRUART, 1, 0, 1);
+  RegWrite_Bits(&SYSCTL->SRUART, 0, 0, 1);
+
+  /* Wait till UART module is Enabled */
+  while(!RegRead_Bits(&SYSCTL->PRUART, mod, 1))
+  ;
+
   /* Get the Base Address based on Module */
   uart_base = UART_getBase(mod);
 
@@ -95,11 +167,19 @@ void UART_Init(UART_Module_e mod, uint32_t baudrate)
   /* Set prescaler to be 8 */
   RegWrite_Bits(&uart_base->CTL, 1, 5, 1); // Select UART prescaler as 8
 
+  /* Enable EOT - Trigger Interrpt after last bit cleared the serializer */
+  RegWrite_Bits(&uart_base->CTL, 1, 4, 1);
+
   /* Select UART module's clock source - System Clock(16MHz) */
   RegWrite_Bits(&uart_base->CC, 0, 0, 4);
 
-  /* Define Interrupt Masks - Receive Interrupt Mask */
-  RegWrite_Bits(&uart_base->IM, 1, 4, 1);
+  /* Define Interrupt Masks */
+  RegWrite_Bits(&uart_base->IM, 1, 4, 1);  // Receive Interrupt Mask
+  RegWrite_Bits(&uart_base->IM, 1, 5, 1);  // Transmit Interrupt Mask
+  RegWrite_Bits(&uart_base->IM, 1, 7, 1);  // Framing Error Interrupt Mask
+  RegWrite_Bits(&uart_base->IM, 1, 8, 1);  // Parity Error Interrupt Mask
+  RegWrite_Bits(&uart_base->IM, 1, 9, 1);  // Break Error Interrupt Mask
+  RegWrite_Bits(&uart_base->IM, 1, 10, 1); // Overrun Error Interrupt Mask
 
   /* Enable UART */
   RegWrite_Bits(&uart_base->CTL, 1, 0, 1);
@@ -219,4 +299,35 @@ void UART_receiveString(uint8_t * strBuf)
     }while(rChar != '\n');
 
     *strBuf = '\0';
+}
+
+void UART_sendChar_NonBlocking(Queue_t *inst, char * str)
+{
+  bool isFirstData = true;
+  
+  while(*str)
+  {
+    if(isFirstData == true)
+    {
+      isFirstData = false;
+
+      /* Send Data by writing the register */
+      UART_sendChar(*str);
+
+      /* Move to Next Data */
+      str++;
+    }
+    else if(Queue_isFull(inst) == Queue_NotFull)
+    {
+      /* Add Data to the Queue */
+      Queue_Enqueue(inst, str);
+
+      /* Move to Next Data */
+      str++;
+    }
+    else
+    {
+      /* Wait till Queue has some Empty space */
+    }
+  }
 }

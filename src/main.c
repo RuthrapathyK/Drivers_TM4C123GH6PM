@@ -4,10 +4,11 @@
 #include "../src/NVIC/nvic.h"
 #include "../src/Queue/queue.h"
 
-#define UART_MAX_QUEUE_COUNT 20
+uint16_t UART_RX_QBuffer[20] = {0};
+uint8_t UART_TX_QBuffer[20] = {0};
 
-uint16_t UART_QBuffer[UART_MAX_QUEUE_COUNT] = {0};
-Queue_t UART_QHandler;
+Queue_t UART_RX_QHandler;
+Queue_t UART_TX_QHandler;
 
 void BoardPins_Init(void)
 {
@@ -18,10 +19,11 @@ void main()
 {
 
   /* Init UART */
-  UART_Init(UART_0, 115200);
+  UART_Init(UART_0, 110);
 
   /* Initialize the Queue for UART */
-  Queue_Init(&UART_QHandler, (uint8_t *)UART_QBuffer, sizeof(UART_QBuffer[0]), sizeof(UART_QBuffer) / sizeof(UART_QBuffer[0]));
+  Queue_Init(&UART_RX_QHandler, (uint8_t *)UART_RX_QBuffer, sizeof(UART_RX_QBuffer[0]), sizeof(UART_RX_QBuffer) / sizeof(UART_RX_QBuffer[0]));
+  Queue_Init(&UART_TX_QHandler, (uint8_t *)UART_TX_QBuffer, sizeof(UART_TX_QBuffer[0]), sizeof(UART_TX_QBuffer) / sizeof(UART_TX_QBuffer[0]));
 
   /* Init the Pin Configurations */
   BoardPins_Init();
@@ -32,25 +34,27 @@ void main()
 
   while(1)
   {
-    /* Sendback the Received Character */
-    while(Queue_isEmpty(&UART_QHandler) == Queue_NotEmpty)
-    {
-      /* Extract Data from Queue*/
-      uint16_t received_char = 0;
-      Queue_Dequeue(&UART_QHandler, (uint8_t *)&received_char);
-
-      /* Transmit the Received Character */
-      UART_sendChar((received_char & 0xFF));      
-      
-      if(Queue_getOverflow_State(&UART_QHandler) == Queue_Overflow)
-      {
-        //Queue_fullFlush(&UART_QHandler);
-        Queue_setOverflow_State(&UART_QHandler, Queue_NoOverflow);
-        UART_sendString("\nOverFlow Occured\n");
-      }
-
-      /* Intentional Delay*/
       delayLoop(1000);
-    }
+      UART_sendChar_NonBlocking(&UART_TX_QHandler, "Ruthrapathy & Nithya are always the best!\n");
+    // /* Sendback the Received Character */
+    // while(Queue_isEmpty(&UART_RX_QHandler) == Queue_NotEmpty)
+    // {
+    //   /* Extract Data from Queue*/
+    //   uint16_t received_char = 0;
+    //   Queue_Dequeue(&UART_RX_QHandler, (uint8_t *)&received_char);
+
+    //   /* Transmit the Received Character */
+    //   UART_sendChar((received_char & 0xFF));      
+      
+    //   if(Queue_getOverflow_State(&UART_RX_QHandler) == Queue_Overflow)
+    //   {
+    //     //Queue_fullFlush(&UART_RX_QHandler);
+    //     Queue_setOverflow_State(&UART_RX_QHandler, Queue_NoOverflow);
+    //     UART_sendString("\nOverFlow Occured\n");
+    //   }
+
+    //   /* Intentional Delay*/
+    //   delayLoop(1000);
+    // }
   }
 }
