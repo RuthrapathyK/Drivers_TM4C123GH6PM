@@ -12,11 +12,25 @@ Queue_t UART_TX_QHandler;
 
 UART_config_t UART0_Handler;
 
+/**
+ * @brief Initializes the board pins for UART communication.
+ *
+ * Configures GPIO pins PA0 and PA1 as UART0 RX and TX pins respectively
+ * by setting up the pin multiplexing for serial communication.
+ */
 void BoardPins_Init(void)
 {
   Pin_Config(Port_PA, 0, PA0_U0RX);
   Pin_Config(Port_PA, 1, PA1_U0TX);
 }
+
+/**
+ * @brief Main entry point of the application.
+ *
+ * Initializes UART communication, configures the receive and transmit queues,
+ * sets up GPIO pins and interrupts, then enters an infinite loop that receives
+ * characters from UART, echoes them back, and monitors for queue overflow conditions.
+ */
 void main()
 {
   /* Get Default Configurations*/

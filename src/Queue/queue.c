@@ -1,5 +1,13 @@
 #include "queue.h"
 
+/**
+ * @brief Sets the queue to its default configuration.
+ *
+ * Initializes all queue indices and counters to zero and clears the overflow flag.
+ * This is an internal function used during queue initialization.
+ *
+ * @param inst Pointer to the queue instance to configure
+ */
 static void Queue_getDefaultConfig(Queue_t *inst)
 {
     inst->eIdx = 0;
@@ -9,6 +17,17 @@ static void Queue_getDefaultConfig(Queue_t *inst)
     inst->QOverflow = Queue_NoOverflow;
 }
 
+/**
+ * @brief Initializes a queue with the specified buffer and specifications.
+ *
+ * Configures a queue instance with a data buffer, element size, and maximum number of elements.
+ * Sets all internal counters and indices to their default values.
+ *
+ * @param inst Pointer to the queue instance to initialize
+ * @param pBuf Pointer to the data buffer to use for queue storage
+ * @param IdxSize Size of each individual element in bytes
+ * @param IdxMax Maximum number of elements the queue can hold
+ */
 void Queue_Init(Queue_t *inst, uint8_t *pBuf, uint32_t IdxSize, uint32_t IdxMax)
 {
     /* Load Default Configuration of a Queue */
@@ -20,6 +39,15 @@ void Queue_Init(Queue_t *inst, uint8_t *pBuf, uint32_t IdxSize, uint32_t IdxMax)
     inst->QBuff_Max = IdxMax;
 }
 
+/**
+ * @brief Adds data to the queue.
+ *
+ * Enqueues an element into the queue. If the queue is full, sets the overflow flag.
+ * The data is copied element by element based on the configured element size.
+ *
+ * @param inst Pointer to the queue instance
+ * @param InData Pointer to the data to enqueue
+ */
 void Queue_Enqueue(Queue_t *inst, uint8_t *InData)
 {
   /* Check for Overflow */
@@ -37,6 +65,15 @@ void Queue_Enqueue(Queue_t *inst, uint8_t *InData)
   inst->eCount++; // Increment the Enqueuing Count also - Count will be used to detect whether the Buffer is full or empty
 }
 
+/**
+ * @brief Removes and retrieves data from the queue.
+ *
+ * Dequeues the first element from the queue and copies it to the output buffer.
+ * The data is copied element by element based on the configured element size.
+ *
+ * @param inst Pointer to the queue instance
+ * @param OutData Pointer to buffer where the dequeued data will be stored
+ */
 void Queue_Dequeue(Queue_t *inst , uint8_t *OutData)
 {
     /* Load the Dequeued data to the Out Variable */
@@ -49,23 +86,56 @@ void Queue_Dequeue(Queue_t *inst , uint8_t *OutData)
     inst->dCount++; // Increment the Dequeuing Count also - Count will be used to detect whether the Buffer is full or empty
 }
 
+/**
+ * @brief Returns the total number of filled elements in the queue.
+ *
+ * Calculates the difference between enqueue and dequeue counts to determine
+ * how many elements are currently stored in the queue.
+ *
+ * @param inst Pointer to the queue instance
+ * @return Number of elements currently in the queue
+ */
 int32_t Queue_TotalFilledIndex(Queue_t *inst)
 {
     return (inst->eCount - inst->dCount);
 }
 
+/**
+ * @brief Checks if the queue is empty.
+ *
+ * Determines whether the queue contains any elements.
+ *
+ * @param inst Pointer to the queue instance
+ * @return Queue_Empty if the queue has no elements, Queue_NotEmpty otherwise
+ */
 Queue_Emptyness_e Queue_isEmpty(Queue_t *inst)
 {
     /* Check if Queue is Empty or Not */
     return Queue_TotalFilledIndex(inst) == 0 ? Queue_Empty : Queue_NotEmpty;
 }
 
+/**
+ * @brief Checks if the queue is full.
+ *
+ * Determines whether the queue has reached its maximum capacity.
+ *
+ * @param inst Pointer to the queue instance
+ * @return Queue_Full if the queue is at maximum capacity, Queue_NotFull otherwise
+ */
 Queue_Fullness_e Queue_isFull(Queue_t *inst)
 {
     /* Check if Queue is Full or Not */
     return Queue_TotalFilledIndex(inst) >= inst->QBuff_Max ? Queue_Full : Queue_NotFull;
 }
 
+/**
+ * @brief Completely flushes the queue.
+ *
+ * Resets all queue indices and counters to their default values and clears all data in the buffer.
+ * After this operation, the queue will be empty and ready to accept new data.
+ *
+ * @param inst Pointer to the queue instance
+ */
 void Queue_fullFlush(Queue_t *inst)
 {
     /* Load Default Configuration of a Queue */
@@ -77,11 +147,28 @@ void Queue_fullFlush(Queue_t *inst)
         inst->QBuff[iter] = 0;
     } 
 }
+
+/**
+ * @brief Sets the overflow state of the queue.
+ *
+ * Updates the overflow flag to indicate whether the queue has experienced an overflow condition.
+ *
+ * @param inst Pointer to the queue instance
+ * @param state The overflow state to set (Queue_Overflow or Queue_NoOverflow)
+ */
 void Queue_setOverflow_State(Queue_t *inst, Queue_Overflow_state state)
 {
     inst->QOverflow = state;
 }
 
+/**
+ * @brief Retrieves the overflow state of the queue.
+ *
+ * Returns the current overflow flag status of the queue.
+ *
+ * @param inst Pointer to the queue instance
+ * @return The current overflow state (Queue_Overflow or Queue_NoOverflow)
+ */
 Queue_Overflow_state Queue_getOverflow_State(Queue_t *inst)
 {
     return inst->QOverflow;

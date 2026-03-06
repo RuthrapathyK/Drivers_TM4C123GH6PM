@@ -57,6 +57,17 @@ __INLINE__ void RegWrite_Bits(volatile uint32_t * reg, uint32_t reg_val, uint8_t
     *reg = temp;
 }
 
+/**
+ * @brief Reads bits from a specified position in a register.
+ *
+ * Extracts and returns the bits at the specified position from a register, shifting them
+ * to the least significant bit position. Validates parameters including bit range.
+ *
+ * @param reg Pointer to the register to read
+ * @param start_bit Starting bit position (0-31)
+ * @param bit_length Number of bits to read (1-32, must not exceed register width)
+ * @return The extracted bits value, right-aligned to bit 0
+ */
 __INLINE__ uint32_t RegRead_Bits(volatile uint32_t * reg, uint8_t start_bit, uint8_t bit_length)
 {
     /* Check the Input Parameters */    
@@ -65,6 +76,14 @@ __INLINE__ uint32_t RegRead_Bits(volatile uint32_t * reg, uint8_t start_bit, uin
     return ((*reg >> start_bit) & (uint32_t)(((uint64_t)1 << (uint64_t)bit_length) - (uint64_t)1));
 }
 
+/**
+ * @brief Creates a blocking delay for approximate milliseconds.
+ *
+ * Implements a busy-wait delay using nested loops with NOP instructions. The actual delay
+ * duration depends on the system clock frequency and compiler optimization settings.
+ *
+ * @param mSec Approximate delay duration in milliseconds
+ */
 void delayLoop(uint32_t mSec);
 
 #endif

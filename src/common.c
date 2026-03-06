@@ -1,9 +1,13 @@
 
 #include "common.h"
-/*
- * @brief The function is used to create a blocking delay. It used traditional for loop
- * 
- * @param mSec delay time in approximate milli-seconds
+
+/**
+ * @brief Creates a blocking delay for approximate milliseconds.
+ *
+ * Implements a busy-wait delay using nested loops with NOP instructions. The actual delay
+ * duration depends on the system clock frequency and compiler optimization settings.
+ *
+ * @param mSec Approximate delay duration in milliseconds
  */
 void delayLoop(uint32_t mSec)
 {

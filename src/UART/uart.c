@@ -5,6 +5,12 @@
 extern Queue_t UART_RX_QHandler;
 extern Queue_t UART_TX_QHandler;
 
+/**
+ * @brief Handles UART receive interrupt.
+ *
+ * Reads data from the UART receive register and enqueues it for processing.
+ * Called from the UART0 interrupt handler when data is available.
+ */
 void UART_RxHandler(void)
 {
   /* Read Data and Clear Interrupt */
@@ -14,6 +20,12 @@ void UART_RxHandler(void)
   Queue_Enqueue(&UART_RX_QHandler, (uint8_t *)&read_val);
 }
 
+/**
+ * @brief Handles UART transmit interrupt.
+ *
+ * Dequeues data from the transmission queue and writes it to the UART transmit register.
+ * Called from the UART0 interrupt handler when the transmit FIFO is ready for new data.
+ */
 void UART_TxHandler(void)
 {
   if(Queue_isEmpty(&UART_TX_QHandler) == Queue_NotEmpty)
@@ -33,6 +45,12 @@ void UART_TxHandler(void)
 
 }
 
+/**
+ * @brief UART0 interrupt service routine.
+ *
+ * Reads the UART interrupt status and dispatches to appropriate handler (receive, transmit, or error).
+ * Clears the corresponding interrupt flag. Asserts on error conditions.
+ */
 void UART0_handler(void)
 {
   /* Read the UART event which caused the Interrupt *///UART Masked Interrupt Status (UARTMIS) register
@@ -77,6 +95,14 @@ void UART0_handler(void)
   }
 }
 
+/**
+ * @brief Gets the base address of the specified UART module.
+ *
+ * Returns the memory base address for the given UART module for register access.
+ *
+ * @param mod The UART module identifier
+ * @return Pointer to the UART module's base address
+ */
 static UART0_Type* UART_getBase(UART_Module_e mod)
 {
   /* Check Preconditions */
@@ -118,6 +144,17 @@ static UART0_Type* UART_getBase(UART_Module_e mod)
   return retval;
 }
 
+/**
+ * @brief Calculates and sets the baud rate for a UART module.
+ *
+ * Computes the integer and fractional parts of the baud rate divider based on the system clock
+ * and desired baud rate. Configures the UART prescaler to 8.
+ *
+ * @param base Pointer to the UART module's base address
+ * @param SystemClock System clock frequency in Hz
+ * @param expectedBaudrate Desired baud rate in bps
+ * @return Boolean status (unused)
+ */
 bool UART_setBaudRate(UART0_Type* base, uint32_t SystemClock, uint32_t expectedBaudrate)
 {
   /* Calculate Baudrate */
@@ -133,6 +170,14 @@ bool UART_setBaudRate(UART0_Type* base, uint32_t SystemClock, uint32_t expectedB
   RegWrite_Bits(&base->CTL, 1, 5, 1); // Select UART prescaler as 8
 }
 
+/**
+ * @brief Sets the UART configuration to default values.
+ *
+ * Configures UART settings to default values: 115200 baud rate, no parity, 1 stop bit,
+ * FIFO disabled, and 8-bit word length.
+ *
+ * @param cfg Pointer to the UART configuration structure to populate with defaults
+ */
 void UART_getDefaultConfig(UART_config_t *cfg)
 {
   /* Set the Most common Configuration setting */
@@ -142,13 +187,16 @@ void UART_getDefaultConfig(UART_config_t *cfg)
   cfg->UART_StopBit = UART_StopBit_One;
   cfg->UART_WordLength = UART_WLen_8bits;
 }
+
 /**
- * @brief Initializes UART0 with the specified baud rate.
+ * @brief Initializes a UART module with the specified configuration.
  *
- * Configures UART0 for 8-bit, no parity, 1 stop bit, FIFO enabled, and sets the baud rate.
- * Uses system clock as source and prescaler of 8.
+ * Configures the specified UART module with the provided settings including baud rate,
+ * parity, stop bits, FIFO mode, and word length. Enables interrupts for receive, transmit,
+ * and error conditions. Uses system clock as source with prescaler of 8.
  *
- * @param baudrate Desired baud rate (e.g., 115200)
+ * @param mod The UART module to initialize (UART_0 through UART_7)
+ * @param cfg Pointer to the UART configuration structure
  */
 void UART_Init(UART_Module_e mod, UART_config_t *cfg)
 {
@@ -322,6 +370,16 @@ void UART_receiveString(uint8_t * strBuf)
     *strBuf = '\0';
 }
 
+/**
+ * @brief Sends a null-terminated string over UART using non-blocking queue-based transmission.
+ *
+ * Enqueues string characters for interrupt-driven transmission. The first character is sent directly
+ * if the transmission queue is empty. Subsequent characters are added to the transmission queue to be
+ * sent via interrupt handler. Blocks if the queue is full.
+ *
+ * @param inst Pointer to the UART transmission queue instance
+ * @param str Pointer to the null-terminated string to send
+ */
 void UART_sendString_NonBlocking(Queue_t *inst, char * str)
 {
   bool isFirstData = true;

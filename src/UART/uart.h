@@ -58,15 +58,25 @@ typedef struct{
     UART_WordLength_e UART_WordLength;
 }UART_config_t;
 
+/**
+ * @brief Sets the UART configuration to default values.
+ *
+ * Configures UART settings to default values: 115200 baud rate, no parity, 1 stop bit,
+ * FIFO disabled, and 8-bit word length.
+ *
+ * @param cfg Pointer to the UART configuration structure to populate with defaults
+ */
 void UART_getDefaultConfig(UART_config_t *cfg);
 
 /**
- * @brief Initializes UART0 with the specified baud rate.
+ * @brief Initializes a UART module with the specified configuration.
  *
- * Configures UART0 for 8-bit, no parity, 1 stop bit, FIFO enabled, and sets the baud rate.
- * Uses system clock as source and prescaler of 8.
+ * Configures the specified UART module with the provided settings including baud rate,
+ * parity, stop bits, FIFO mode, and word length. Enables interrupts for receive, transmit,
+ * and error conditions. Uses system clock as source with prescaler of 8.
  *
- * @param baudrate Desired baud rate (e.g., 115200)
+ * @param mod The UART module to initialize (UART_0 through UART_7)
+ * @param cfg Pointer to the UART configuration structure
  */
 void UART_Init(UART_Module_e mod, UART_config_t *cfg);
 
@@ -115,6 +125,16 @@ uint8_t UART_receiveChar(void);
  */
 void UART_receiveString(uint8_t * strBuf);
 
+/**
+ * @brief Sends a null-terminated string over UART using non-blocking queue-based transmission.
+ *
+ * Enqueues string characters for interrupt-driven transmission. The first character is sent directly
+ * if the transmission queue is empty. Subsequent characters are added to the transmission queue to be
+ * sent via interrupt handler. Blocks if the queue is full.
+ *
+ * @param inst Pointer to the UART transmission queue instance
+ * @param str Pointer to the null-terminated string to send
+ */
 void UART_sendString_NonBlocking(Queue_t *inst, char * str);
 
 #endif
