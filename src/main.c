@@ -39,26 +39,27 @@ void main()
   while(1)
   {
       delayLoop(1000);
-      UART_sendChar_NonBlocking(&UART_TX_QHandler, "Ruthrapathy & Nithya are always the best!\n");
-    // /* Sendback the Received Character */
-    // while(Queue_isEmpty(&UART_RX_QHandler) == Queue_NotEmpty)
-    // {
-    //   /* Extract Data from Queue*/
-    //   uint16_t received_char = 0;
-    //   Queue_Dequeue(&UART_RX_QHandler, (uint8_t *)&received_char);
+      UART_sendString_NonBlocking(&UART_TX_QHandler, "For large amounts of input, the linear access time of linked lists is prohibitive. In this chapter we look at a simple data structure for which the running time of most operations is O(log n ) on average. We also sketch a conceptually simple modification to this data structure that guarantees the above time bound in the worst case and discuss a second modification that essentially gives an O(log n ) running time per operation for a long sequence of instructions.\n");
 
-    //   /* Transmit the Received Character */
-    //   UART_sendChar((received_char & 0xFF));      
-      
-    //   if(Queue_getOverflow_State(&UART_RX_QHandler) == Queue_Overflow)
-    //   {
-    //     //Queue_fullFlush(&UART_RX_QHandler);
-    //     Queue_setOverflow_State(&UART_RX_QHandler, Queue_NoOverflow);
-    //     UART_sendString("\nOverFlow Occured\n");
-    //   }
+      /* Sendback the Received Character */
+      if(Queue_isEmpty(&UART_RX_QHandler) == Queue_NotEmpty)
+      {
+        /* Extract Data from Queue*/
+        uint16_t received_char = 0;
+        Queue_Dequeue(&UART_RX_QHandler, (uint8_t *)&received_char);
 
-    //   /* Intentional Delay*/
-    //   delayLoop(1000);
-    // }
+        /* Transmit the Received Character */
+        UART_sendString_NonBlocking(&UART_TX_QHandler, (char *)&received_char);      
+        
+        if(Queue_getOverflow_State(&UART_RX_QHandler) == Queue_Overflow)
+        {
+          //Queue_fullFlush(&UART_RX_QHandler);
+          Queue_setOverflow_State(&UART_RX_QHandler, Queue_NoOverflow);
+          UART_sendString("\nOverFlow Occured\n");
+        }
+
+        /* Intentional Delay*/
+        delayLoop(1000);
+    }
   }
 }

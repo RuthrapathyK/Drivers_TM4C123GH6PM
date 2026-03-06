@@ -322,7 +322,7 @@ void UART_receiveString(uint8_t * strBuf)
     *strBuf = '\0';
 }
 
-void UART_sendChar_NonBlocking(Queue_t *inst, char * str)
+void UART_sendString_NonBlocking(Queue_t *inst, char * str)
 {
   bool isFirstData = true;
   
