@@ -117,6 +117,31 @@ static UART0_Type* UART_getBase(UART_Module_e mod)
 
   return retval;
 }
+
+bool UART_setBaudRate(UART0_Type* base, uint32_t SystemClock, uint32_t expectedBaudrate)
+{
+  /* Calculate Baudrate */
+  float Baud_Val = (float)SystemClock / (8.0f * expectedBaudrate);
+  uint16_t Baud_Integer = (uint16_t)Baud_Val; // Derive the Integer part of the Value
+  uint8_t Baud_Fraction = (uint8_t)((((float)Baud_Val - (float)Baud_Integer) * 64.0f) + 0.5f); // Derive the Fraction part of the Value
+
+  /* Write the Baudrate */
+  RegWrite_Bits(&base->IBRD, Baud_Integer, 0, 16);
+  RegWrite_Bits(&base->FBRD, Baud_Fraction, 0, 6);
+
+  /* Set prescaler to be 8 */
+  RegWrite_Bits(&base->CTL, 1, 5, 1); // Select UART prescaler as 8
+}
+
+void UART_getDefaultConfig(UART_config_t *cfg)
+{
+  /* Set the Most common Configuration setting */
+  cfg->UART_BaudRate = 115200;
+  cfg->UART_Fifo = UART_FIFO_Disabled;
+  cfg->UART_Parity = UART_No_Parity;
+  cfg->UART_StopBit = UART_StopBit_One;
+  cfg->UART_WordLength = UART_WLen_8bits;
+}
 /**
  * @brief Initializes UART0 with the specified baud rate.
  *
@@ -125,11 +150,15 @@ static UART0_Type* UART_getBase(UART_Module_e mod)
  *
  * @param baudrate Desired baud rate (e.g., 115200)
  */
-void UART_Init(UART_Module_e mod, uint32_t baudrate)
+void UART_Init(UART_Module_e mod, UART_config_t *cfg)
 {
-  ASSERT((mod < UART_Module_Max) && (baudrate > 0));
+  ASSERT((mod < UART_Module_Max) && (cfg->UART_BaudRate > 0));
 
   UART0_Type * uart_base = 0;
+
+  /* Reset the UART0 module */
+  RegWrite_Bits(&SYSCTL->SRUART, 1, 0, 1);
+  RegWrite_Bits(&SYSCTL->SRUART, 0, 0, 1);
 
   /* Enable Clock for UART0 module */
   RegWrite_Bits(&SYSCTL->RCGCUART, 1, mod, 1);
@@ -138,40 +167,32 @@ void UART_Init(UART_Module_e mod, uint32_t baudrate)
   while(!RegRead_Bits(&SYSCTL->PRUART, mod, 1))
   ;
 
-  /* Reset the UART0 module */
-  RegWrite_Bits(&SYSCTL->SRUART, 1, 0, 1);
-  RegWrite_Bits(&SYSCTL->SRUART, 0, 0, 1);
-
-  /* Wait till UART module is Enabled */
-  while(!RegRead_Bits(&SYSCTL->PRUART, mod, 1))
-  ;
-
   /* Get the Base Address based on Module */
   uart_base = UART_getBase(mod);
-
-  /* Calculate Baudrate */
-  float Baud_Val = (float)SYSTEM_CLOCK_FREQ / (8.0f * baudrate);
-  uint16_t Baud_Integer = (uint16_t)Baud_Val; // Derive the Integer part of the Value
-  uint8_t Baud_Fraction = (uint8_t)((((float)Baud_Val - (float)Baud_Integer) * 64.0f) + 0.5f); // Derive the Fraction part of the Value
   
   /* Disable UART */
   RegWrite_Bits(&uart_base->CTL, 0, 0, 1);
-
-  /* Write the Baudrate */
-  RegWrite_Bits(&uart_base->IBRD, Baud_Integer, 0, 16);
-  RegWrite_Bits(&uart_base->FBRD, Baud_Fraction, 0, 6);
-
-  /* Configure Stopbit, Parity, FIFOs, Word Length */
-  RegWrite_Bits(&uart_base->LCRH, 3, 5, 2);
   
-  /* Set prescaler to be 8 */
-  RegWrite_Bits(&uart_base->CTL, 1, 5, 1); // Select UART prescaler as 8
+  /* Set the Expected Baudrate */
+  UART_setBaudRate(uart_base, SYSTEM_CLOCK_FREQ, cfg->UART_BaudRate);
 
-  /* Enable EOT - Trigger Interrpt after last bit cleared the serializer */
-  RegWrite_Bits(&uart_base->CTL, 1, 4, 1);
+  /* Configure Stopbit */
+  RegWrite_Bits(&uart_base->LCRH, cfg->UART_StopBit, 3, 1);
+
+  /* Configure Parity*/
+  RegWrite_Bits(&uart_base->LCRH, cfg->UART_Parity, 1, 2);
+
+  /* Configure FIFOs*/
+  RegWrite_Bits(&uart_base->LCRH, cfg->UART_Fifo, 4, 1);
 
   /* Select UART module's clock source - System Clock(16MHz) */
   RegWrite_Bits(&uart_base->CC, 0, 0, 4);
+
+  /* Configure Word Length*/
+  RegWrite_Bits(&uart_base->LCRH, cfg->UART_WordLength, 5, 2);
+
+  /* Enable EOT - Trigger Interrpt after last bit cleared the serializer */
+  RegWrite_Bits(&uart_base->CTL, 1, 4, 1);
 
   /* Define Interrupt Masks */
   RegWrite_Bits(&uart_base->IM, 1, 4, 1);  // Receive Interrupt Mask
@@ -314,16 +335,12 @@ void UART_sendChar_NonBlocking(Queue_t *inst, char * str)
 
       /* Send Data by writing the register */
       UART_sendChar(*str);
-
-      /* Move to Next Data */
       str++;
     }
     else if(Queue_isFull(inst) == Queue_NotFull)
     {
       /* Add Data to the Queue */
       Queue_Enqueue(inst, str);
-
-      /* Move to Next Data */
       str++;
     }
     else

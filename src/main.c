@@ -10,6 +10,8 @@ uint8_t UART_TX_QBuffer[20] = {0};
 Queue_t UART_RX_QHandler;
 Queue_t UART_TX_QHandler;
 
+UART_config_t UART0_Handler;
+
 void BoardPins_Init(void)
 {
   Pin_Config(Port_PA, 0, PA0_U0RX);
@@ -17,9 +19,11 @@ void BoardPins_Init(void)
 }
 void main()
 {
+  /* Get Default Configurations*/
+  UART_getDefaultConfig(&UART0_Handler);
 
   /* Init UART */
-  UART_Init(UART_0, 110);
+  UART_Init(UART_0, &UART0_Handler);
 
   /* Initialize the Queue for UART */
   Queue_Init(&UART_RX_QHandler, (uint8_t *)UART_RX_QBuffer, sizeof(UART_RX_QBuffer[0]), sizeof(UART_RX_QBuffer) / sizeof(UART_RX_QBuffer[0]));

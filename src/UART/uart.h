@@ -28,21 +28,38 @@ typedef enum{
 }UART_Module_e;
 
 typedef enum{
-  UART_Even_Parity,
-  UART_Odd_Parity,
-  UART_No_Parity
+  UART_No_Parity   = 0b00,
+  UART_Odd_Parity  = 0b01,
+  UART_Even_Parity = 0b11
 }UART_Parity_e;
 
 typedef enum{
-  UART_StopBit_One,
-  UART_StopBit_Two
+  UART_StopBit_One = 0,
+  UART_StopBit_Two = 1
 }UART_StopBit_e;
+
+typedef enum{
+  UART_FIFO_Disabled = 0,
+  UART_FIFO_Enabled = 1
+}UART_FIFO_e;
+
+typedef enum{
+  UART_WLen_5bits = 0,
+  UART_WLen_6bits = 1,
+  UART_WLen_7bits = 2,
+  UART_WLen_8bits = 3
+}UART_WordLength_e;
 
 typedef struct{
     uint32_t UART_BaudRate;
     UART_StopBit_e UART_StopBit;
     UART_Parity_e UART_Parity;
+    UART_FIFO_e UART_Fifo;
+    UART_WordLength_e UART_WordLength;
 }UART_config_t;
+
+void UART_getDefaultConfig(UART_config_t *cfg);
+
 /**
  * @brief Initializes UART0 with the specified baud rate.
  *
@@ -51,7 +68,7 @@ typedef struct{
  *
  * @param baudrate Desired baud rate (e.g., 115200)
  */
-void UART_Init(UART_Module_e mod, uint32_t baudrate);
+void UART_Init(UART_Module_e mod, UART_config_t *cfg);
 
 /**
  * @brief Sends a single character over UART0.
