@@ -31,7 +31,7 @@ void BoardPins_Init(void)
  * sets up GPIO pins and interrupts, then enters an infinite loop that receives
  * characters from UART, echoes them back, and monitors for queue overflow conditions.
  */
-void main()
+int main()
 {
   /* Get Default Configurations*/
   UART_getDefaultConfig(&UART0_Handler);
@@ -76,4 +76,6 @@ void main()
         delayLoop(1000);
     }
   }
+
+  return 0;
 }

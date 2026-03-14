@@ -185,7 +185,7 @@ void GPIO_togglePin(GPIO_PortPins_e portPin)
  *
  * @return GPIO_State_e The current state of the pin (GPIO_State_OFF or GPIO_State_ON)
  */
-uint8_t GPIO_getPinState(GPIO_PortPins_e portPin)
+GPIO_State_e GPIO_getPinState(GPIO_PortPins_e portPin)
 {
     GPIOA_Type * gpioBase = NULL;
 

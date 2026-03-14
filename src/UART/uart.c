@@ -168,6 +168,8 @@ bool UART_setBaudRate(UART0_Type* base, uint32_t SystemClock, uint32_t expectedB
 
   /* Set prescaler to be 8 */
   RegWrite_Bits(&base->CTL, 1, 5, 1); // Select UART prescaler as 8
+
+  return true;
 }
 
 /**
@@ -398,7 +400,7 @@ void UART_sendString_NonBlocking(Queue_t *inst, char * str)
     else if(Queue_isFull(inst) == Queue_NotFull)
     {
       /* Add Data to the Queue */
-      Queue_Enqueue(inst, str);
+      Queue_Enqueue(inst, (uint8_t *)str);
       str++;
     }
     else

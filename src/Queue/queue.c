@@ -119,7 +119,7 @@ void Queue_Dequeue(Queue_t *inst , uint8_t *OutData)
  * @param inst Pointer to the queue instance
  * @return Number of elements currently in the queue
  */
-int32_t Queue_TotalFilledIndex(Queue_t *inst)
+uint32_t Queue_TotalFilledIndex(Queue_t *inst)
 {
     return (inst->eCount - inst->dCount);
 }

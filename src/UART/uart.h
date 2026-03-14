@@ -28,9 +28,9 @@ typedef enum{
 }UART_Module_e;
 
 typedef enum{
-  UART_No_Parity   = 0b00,
-  UART_Odd_Parity  = 0b01,
-  UART_Even_Parity = 0b11
+  UART_No_Parity   = 0,
+  UART_Odd_Parity  = 1,
+  UART_Even_Parity = 3
 }UART_Parity_e;
 
 typedef enum{

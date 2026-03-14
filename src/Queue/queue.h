@@ -19,14 +19,14 @@ typedef enum{
 }Queue_OverFlowStatus_e;
 
 typedef struct{
-  volatile int32_t eIdx;
-  volatile int32_t dIdx;
+  volatile uint32_t eIdx;
+  volatile uint32_t dIdx;
   uint8_t *QBuff;
-  int32_t QBuff_Max;
-  volatile int32_t eCount;
-  volatile int32_t dCount;
-  volatile int32_t OverFlow_DetectedCount;
-  volatile int32_t OverFlow_ResolvedCount;
+  uint32_t QBuff_Max;
+  volatile uint32_t eCount;
+  volatile uint32_t dCount;
+  volatile uint32_t OverFlow_DetectedCount;
+  volatile uint32_t OverFlow_ResolvedCount;
   uint32_t QBuff_IdxSize;
 }Queue_t;
 
@@ -104,7 +104,7 @@ void Queue_fullFlush(Queue_t *inst);
  * @param inst Pointer to the queue instance
  * @return Number of elements currently in the queue
  */
-int32_t Queue_TotalFilledIndex(Queue_t *inst);
+uint32_t Queue_TotalFilledIndex(Queue_t *inst);
 
 /**
  * @brief Retrieves the overflow state of the queue.
