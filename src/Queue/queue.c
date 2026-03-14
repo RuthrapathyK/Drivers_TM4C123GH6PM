@@ -14,7 +14,8 @@ static void Queue_getDefaultConfig(Queue_t *inst)
     inst->dIdx = 0;
     inst->eCount = 0;
     inst->dCount = 0;
-    inst->QOverflow = Queue_NoOverflow;
+    inst->OverFlow_DetectedCount = 0;
+    inst->OverFlow_ResolvedCount = 0;
 }
 
 /**
@@ -52,7 +53,18 @@ void Queue_Enqueue(Queue_t *inst, uint8_t *InData)
 {
   /* Check for Overflow */
   if(Queue_isFull(inst) == Queue_Full)
-    Queue_setOverflow_State(inst, Queue_Overflow);
+  {
+    /* Increament the OverFlow Counter only if the Previous OverFlow is served */
+    if(Queue_isOverFlowed(inst) == Queue_NoOverflow)
+    {
+        /* Increament Overflow Count */
+        inst->OverFlow_DetectedCount++;
+    }
+    else
+    {
+        /* Avoid Multiple Overflow Increaments */
+    }
+  }
 
   /* Load the Queue with all Enqueued bytes */
   for(uint32_t byteIdx = 0; byteIdx < inst->QBuff_IdxSize; byteIdx++)
@@ -76,6 +88,18 @@ void Queue_Enqueue(Queue_t *inst, uint8_t *InData)
  */
 void Queue_Dequeue(Queue_t *inst , uint8_t *OutData)
 {
+    if(Queue_isOverFlowed(inst) == Queue_Overflow)
+    {
+        /* Increament Overflow Flag */
+        inst->OverFlow_ResolvedCount++;
+
+        /* Move the Dequeue Index */
+        inst->dIdx = inst->eIdx;
+
+        /* Set the Dequeue Count to Process the Queueu index to Max */
+        inst->dCount = inst->eCount - inst->QBuff_Max;
+    }
+
     /* Load the Dequeued data to the Out Variable */
     for(uint32_t byteIdx = 0; byteIdx < inst->QBuff_IdxSize; byteIdx++)
     {
@@ -149,19 +173,6 @@ void Queue_fullFlush(Queue_t *inst)
 }
 
 /**
- * @brief Sets the overflow state of the queue.
- *
- * Updates the overflow flag to indicate whether the queue has experienced an overflow condition.
- *
- * @param inst Pointer to the queue instance
- * @param state The overflow state to set (Queue_Overflow or Queue_NoOverflow)
- */
-void Queue_setOverflow_State(Queue_t *inst, Queue_Overflow_state state)
-{
-    inst->QOverflow = state;
-}
-
-/**
  * @brief Retrieves the overflow state of the queue.
  *
  * Returns the current overflow flag status of the queue.
@@ -169,7 +180,7 @@ void Queue_setOverflow_State(Queue_t *inst, Queue_Overflow_state state)
  * @param inst Pointer to the queue instance
  * @return The current overflow state (Queue_Overflow or Queue_NoOverflow)
  */
-Queue_Overflow_state Queue_getOverflow_State(Queue_t *inst)
+Queue_OverFlowStatus_e Queue_isOverFlowed(Queue_t *inst)
 {
-    return inst->QOverflow;
+    return (inst->OverFlow_DetectedCount > inst->OverFlow_ResolvedCount) ? Queue_Overflow : Queue_NoOverflow;
 }

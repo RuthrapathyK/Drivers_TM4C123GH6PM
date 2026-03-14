@@ -61,20 +61,20 @@ void test_queue_2(void)
 
     TEST_ASSERT(Queue_isEmpty(&test_handler) == Queue_NotEmpty);
     TEST_ASSERT(Queue_isFull(&test_handler) == Queue_Full);
-    TEST_ASSERT(test_handler.QOverflow == Queue_NoOverflow);
+    TEST_ASSERT(Queue_isOverFlowed(&test_handler) == Queue_NoOverflow);
     Queue_Enqueue(&test_handler, (uint8_t *)"e");
-    TEST_ASSERT(test_handler.QOverflow == Queue_Overflow);
+    TEST_ASSERT(Queue_isOverFlowed(&test_handler) == Queue_Overflow);
 
-    Queue_Dequeue(&test_handler, (uint8_t *)&readval);  
-    TEST_ASSERT_EQUAL_CHAR('e', readval);
     Queue_Dequeue(&test_handler, (uint8_t *)&readval);  
     TEST_ASSERT_EQUAL_CHAR('c', readval);
     Queue_Dequeue(&test_handler, (uint8_t *)&readval);  
     TEST_ASSERT_EQUAL_CHAR('d', readval);
+    Queue_Dequeue(&test_handler, (uint8_t *)&readval);  
+    TEST_ASSERT_EQUAL_CHAR('e', readval);
 
-    //TEST_ASSERT(Queue_isEmpty(&test_handler) == Queue_Empty);
+    TEST_ASSERT(Queue_isEmpty(&test_handler) == Queue_Empty);
     TEST_ASSERT(Queue_isFull(&test_handler) == Queue_NotFull);
-    TEST_ASSERT(test_handler.QOverflow == Queue_Overflow);
+    TEST_ASSERT(Queue_isOverFlowed(&test_handler) == Queue_NoOverflow);
 }
 
 void test_queue_3(void)
