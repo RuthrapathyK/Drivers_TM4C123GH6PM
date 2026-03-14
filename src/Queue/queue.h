@@ -16,16 +16,17 @@ typedef enum{
 typedef enum{
     Queue_Overflow,
     Queue_NoOverflow
-}Queue_Overflow_state;
+}Queue_OverFlowStatus_e;
 
 typedef struct{
-  int32_t eIdx;
-  int32_t dIdx;
+  volatile int32_t eIdx;
+  volatile int32_t dIdx;
   uint8_t *QBuff;
   int32_t QBuff_Max;
-  int32_t eCount;
-  int32_t dCount;
-  Queue_Overflow_state QOverflow;
+  volatile int32_t eCount;
+  volatile int32_t dCount;
+  volatile int32_t OverFlow_DetectedCount;
+  volatile int32_t OverFlow_ResolvedCount;
   uint32_t QBuff_IdxSize;
 }Queue_t;
 
@@ -106,16 +107,6 @@ void Queue_fullFlush(Queue_t *inst);
 int32_t Queue_TotalFilledIndex(Queue_t *inst);
 
 /**
- * @brief Sets the overflow state of the queue.
- *
- * Updates the overflow flag to indicate whether the queue has experienced an overflow condition.
- *
- * @param inst Pointer to the queue instance
- * @param state The overflow state to set (Queue_Overflow or Queue_NoOverflow)
- */
-void Queue_setOverflow_State(Queue_t *inst, Queue_Overflow_state state);
-
-/**
  * @brief Retrieves the overflow state of the queue.
  *
  * Returns the current overflow flag status of the queue.
@@ -123,6 +114,6 @@ void Queue_setOverflow_State(Queue_t *inst, Queue_Overflow_state state);
  * @param inst Pointer to the queue instance
  * @return The current overflow state (Queue_Overflow or Queue_NoOverflow)
  */
-Queue_Overflow_state Queue_getOverflow_State(Queue_t *inst);
+Queue_OverFlowStatus_e Queue_isOverFlowed(Queue_t *inst);
 
 #endif
