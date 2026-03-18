@@ -206,11 +206,11 @@ void UART_Init(UART_Module_e mod, UART_config_t *cfg)
 
   UART0_Type * uart_base = 0;
 
-  /* Reset the UART0 module */
-  RegWrite_Bits(&SYSCTL->SRUART, 1, 0, 1);
-  RegWrite_Bits(&SYSCTL->SRUART, 0, 0, 1);
+  /* Reset the UART module */
+  RegWrite_Bits(&SYSCTL->SRUART, 1, mod, 1);
+  RegWrite_Bits(&SYSCTL->SRUART, 0, mod, 1);
 
-  /* Enable Clock for UART0 module */
+  /* Enable Clock for UART module */
   RegWrite_Bits(&SYSCTL->RCGCUART, 1, mod, 1);
 
   /* Wait till UART module is Enabled */
@@ -335,7 +335,54 @@ void UART_sendNumber(int32_t num)
   /* Send the ASCII converted number String */
   UART_sendString(num_arr);
 }
+/**
+ * @brief Sends a signed 32-bit integer as ASCII characters over UART0.
+ *
+ * Converts the number to a string and sends it using UART_sendString.
+ *
+ * @param num Number to send
+ */
+void UART_sendNumber_NonBlocking(Queue_t *inst, int32_t num)
+{
+  char num_arr[20] = {0};
+  uint8_t first_idx = 0, last_idx = 0;
+  char temp_char = 0;
 
+  /* Check whether the input is non-printable */
+  ASSERT(num != -2147483648)  
+
+  /* Check if the number is negative */
+  if(num < 0)
+  {
+    UART_sendChar('-'); // Send minus character first
+    num *= -1; // Make the number positive
+  }
+
+  do
+  {
+    num_arr[last_idx] = (num % 10)+'0'; // Store the digit as character
+    num /= 10;  // Remove the digit
+    last_idx++;
+  }while(num);
+
+  num_arr[last_idx] = '\0'; // Place NULL character at the end of the string array
+
+  last_idx--; // Point the index to the last character of the num_arr
+
+  /* Swap the Characters */
+  while(last_idx > first_idx)
+  {
+    temp_char = num_arr[first_idx];
+    num_arr[first_idx] = num_arr[last_idx];
+    num_arr[last_idx] = temp_char;
+
+    last_idx--;
+    first_idx++;
+  }
+
+  /* Send the ASCII converted number String */
+  UART_sendString_NonBlocking(inst, num_arr);
+}
 /**
  * @brief Receives a single character from UART0.
  *

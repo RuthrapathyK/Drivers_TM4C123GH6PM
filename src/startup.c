@@ -1,4 +1,4 @@
-#include "typedef.h"
+#include "common.h"
 
 #define MAX_VECTOR 155u
 
@@ -1067,4 +1067,7 @@ void Reset_handler(void)
 
     // Call main
     main();
+
+    // Ideally Control should not Reach here
+    ASSERT(0);
 }

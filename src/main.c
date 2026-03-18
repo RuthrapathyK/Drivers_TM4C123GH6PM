@@ -3,6 +3,7 @@
 #include "../src/PinMux/pinconfig.h"
 #include "../src/NVIC/nvic.h"
 #include "../src/Queue/queue.h"
+#include "../src/ADC/adc.h"
 
 uint16_t UART_RX_QBuffer[20] = {0};
 uint8_t UART_TX_QBuffer[20] = {0};
@@ -20,10 +21,37 @@ UART_config_t UART0_Handler;
  */
 void BoardPins_Init(void)
 {
+  /* Configure UART Pins */
   Pin_Config(Port_PA, 0, PA0_U0RX);
   Pin_Config(Port_PA, 1, PA1_U0TX);
+
+  /* Configure ADC Pins */
+  Pin_Config(Port_PE, 3, PE3_ANALOG_AIN0);
 }
 
+void BoardPeripheral_Init(void)
+{
+  /* Init UART */
+  UART_getDefaultConfig(&UART0_Handler);
+  UART_Init(UART_0, &UART0_Handler);
+
+  /* Init ADC */
+  ADC_Init(ADC_0);
+}
+void BoardServices_Init(void)
+{
+  /* Initialize the Queue for UART */
+  Queue_Init(&UART_RX_QHandler, (uint8_t *)UART_RX_QBuffer, sizeof(UART_RX_QBuffer[0]), sizeof(UART_RX_QBuffer) / sizeof(UART_RX_QBuffer[0]));
+  Queue_Init(&UART_TX_QHandler, (uint8_t *)UART_TX_QBuffer, sizeof(UART_TX_QBuffer[0]), sizeof(UART_TX_QBuffer) / sizeof(UART_TX_QBuffer[0]));
+}
+void BoardInterrupt_Init(void)
+{
+  __disable_irq();
+
+  NVIC_enableInterrupt(UART_0_IRQ);
+  
+  __enable_irq();
+}
 /**
  * @brief Main entry point of the application.
  *
@@ -33,48 +61,29 @@ void BoardPins_Init(void)
  */
 int main()
 {
-  /* Get Default Configurations*/
-  UART_getDefaultConfig(&UART0_Handler);
-
-  /* Init UART */
-  UART_Init(UART_0, &UART0_Handler);
-
-  /* Initialize the Queue for UART */
-  Queue_Init(&UART_RX_QHandler, (uint8_t *)UART_RX_QBuffer, sizeof(UART_RX_QBuffer[0]), sizeof(UART_RX_QBuffer) / sizeof(UART_RX_QBuffer[0]));
-  Queue_Init(&UART_TX_QHandler, (uint8_t *)UART_TX_QBuffer, sizeof(UART_TX_QBuffer[0]), sizeof(UART_TX_QBuffer) / sizeof(UART_TX_QBuffer[0]));
+  /* Init Peripherals needed */
+  BoardPeripheral_Init();
 
   /* Init the Pin Configurations */
   BoardPins_Init();
+ 
+  /* Init other Services */
+  BoardServices_Init();
 
   /* Init Interrupts */
-  NVIC_enableInterrupt(UART_0_IRQ);
-  __enable_irq();
+  BoardInterrupt_Init();
 
+  int32_t counter = 0;
   while(1)
   {
-      // delayLoop(1000);
-      // UART_sendString_NonBlocking(&UART_TX_QHandler, "For large amounts of input, the linear access time of linked lists is prohibitive. In this chapter we look at a simple data structure for which the running time of most operations is O(log n ) on average. We also sketch a conceptually simple modification to this data structure that guarantees the above time bound in the worst case and discuss a second modification that essentially gives an O(log n ) running time per operation for a long sequence of instructions.\n");
+    counter %= 1000;
+    counter++;
 
-      /* Sendback the Received Character */
-      if(Queue_isEmpty(&UART_RX_QHandler) == Queue_NotEmpty)
-      {
+    UART_sendString_NonBlocking(&UART_TX_QHandler, "$$P-tod,");
+    UART_sendNumber_NonBlocking(&UART_TX_QHandler, counter);
+    UART_sendString_NonBlocking(&UART_TX_QHandler,";");
 
-        if(Queue_isOverFlowed(&UART_RX_QHandler) == Queue_Overflow)
-        {
-          //Queue_fullFlush(&UART_RX_QHandler);
-          UART_sendString("\nOverFlow Occured\n");
-        }
-
-        /* Extract Data from Queue*/
-        uint16_t received_char = 0;
-        Queue_Dequeue(&UART_RX_QHandler, (uint8_t *)&received_char);
-
-        /* Transmit the Received Character */
-        UART_sendString_NonBlocking(&UART_TX_QHandler, (char *)&received_char);      
-
-        /* Intentional Delay*/
-        delayLoop(1000);
-    }
+    delayLoop(100);
   }
 
   return 0;

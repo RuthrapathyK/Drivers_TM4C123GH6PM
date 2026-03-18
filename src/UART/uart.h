@@ -16,14 +16,14 @@
 
 
 typedef enum{
-  UART_0,
-  UART_1,
-  UART_2,
-  UART_3,
-  UART_4,
-  UART_5,
-  UART_6,
-  UART_7,
+  UART_0 = 0,
+  UART_1 = 1,
+  UART_2 = 2,
+  UART_3 = 3,
+  UART_4 = 4,
+  UART_5 = 5,
+  UART_6 = 6,
+  UART_7 = 7,
   UART_Module_Max
 }UART_Module_e;
 
@@ -136,5 +136,7 @@ void UART_receiveString(uint8_t * strBuf);
  * @param str Pointer to the null-terminated string to send
  */
 void UART_sendString_NonBlocking(Queue_t *inst, char * str);
+
+void UART_sendNumber_NonBlocking(Queue_t *inst, int32_t num);
 
 #endif
