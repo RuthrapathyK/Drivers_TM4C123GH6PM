@@ -5,6 +5,8 @@
 #include "../src/Queue/queue.h"
 #include "../src/ADC/adc.h"
 
+#define MAX_SAMPLE_SIZE 1000
+
 uint16_t UART_RX_QBuffer[20] = {0};
 uint8_t UART_TX_QBuffer[20] = {0};
 
@@ -12,6 +14,8 @@ Queue_t UART_RX_QHandler;
 Queue_t UART_TX_QHandler;
 
 UART_config_t UART0_Handler;
+
+uint16_t adc_val[MAX_SAMPLE_SIZE] = {0};
 
 /**
  * @brief Initializes the board pins for UART communication.
@@ -72,14 +76,20 @@ int main()
 
   /* Init Interrupts */
   BoardInterrupt_Init();
-  uint16_t adc_val = 0;
+
   while(1)
   {
-    adc_val = ADC_ReadRaw(ADC_0);
-
-    UART_sendString_NonBlocking(&UART_TX_QHandler, "$$P-tod,");
-    UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc_val);
-    UART_sendString_NonBlocking(&UART_TX_QHandler,";");
+    for(uint32_t iter = 0; iter < MAX_SAMPLE_SIZE; iter++)
+    {
+      adc_val[iter] = ADC_ReadRaw(ADC_0);
+    }
+    
+    for(uint32_t iter = 0; iter < MAX_SAMPLE_SIZE; iter++)
+    {
+      UART_sendString_NonBlocking(&UART_TX_QHandler, "$$P-,");
+      UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc_val[iter]);
+      UART_sendString_NonBlocking(&UART_TX_QHandler,";");
+    }
   }
 
   return 0;
