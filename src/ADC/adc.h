@@ -21,11 +21,47 @@ typedef enum{
     ADC_ClockSource_PIOSC = 0x1
 }ADC_ClockSource_e;
 
+typedef enum{
+    ADC_TriggerSelect_Processor = 0x0,
+    ADC_TriggerSelect_Comapartor_0 = 0x1,
+    ADC_TriggerSelect_Comapartor_1 = 0x2,
+    ADC_TriggerSelect_ExternalPin = 0x4,
+    ADC_TriggerSelect_Timer = 0x5,
+    ADC_TriggerSelect_PWM_0 = 0x6,
+    ADC_TriggerSelect_PWM_1 = 0x7,
+    ADC_TriggerSelect_PWM_2 = 0x8,
+    ADC_TriggerSelect_PWM_3 = 0x9,
+    ADC_TriggerSelect_Always = 0xF,
+}ADC_TriggerSelect_e;
+
+typedef enum{
+    ADC_SSPriority_0 = 0x0,
+    ADC_SSPriority_1 = 0x1,
+    ADC_SSPriority_2 = 0x2,
+    ADC_SSPriority_3 = 0x3,
+}ADC_SSPriority_e;
+
+typedef enum{
+    ADC_SampleInput_AIN0 = 0,
+    ADC_SampleInput_AIN1 = 1,
+    ADC_SampleInput_AIN2 = 2,
+    ADC_SampleInput_AIN3 = 3,
+    ADC_SampleInput_AIN4 = 4,
+    ADC_SampleInput_AIN5 = 5,
+    ADC_SampleInput_AIN6 = 6,
+    ADC_SampleInput_AIN7 = 7,
+    ADC_SampleInput_AIN8 = 8,
+    ADC_SampleInput_AIN9 = 9,
+    ADC_SampleInput_AIN10 = 10,
+    ADC_SampleInput_AIN11 = 11
+}ADC_SampleInput_e;
+
 typedef struct 
 {
     uint8_t dummy;
 }ADC_Config_t;
 
 void ADC_Init(ADC_Module_e mod);
+uint16_t ADC_ReadRaw(ADC_Module_e mod);
 
 #endif

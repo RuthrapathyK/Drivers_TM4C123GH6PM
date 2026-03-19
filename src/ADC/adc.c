@@ -55,7 +55,36 @@ void ADC_Init(ADC_Module_e mod)
     RegWrite_Bits(&adc_base->PC, ADC_SampleRate_125ksps, 0, 4);
 
     /* Configure Sample Sequencer Priorities */
+    RegWrite_Bits(&adc_base->SSPRI, ADC_SSPriority_0, 0, 2);
 
-    /* Configure Sample Sequencer */
+    /* Disable Sample Sequencer */
+    RegWrite_Bits(&adc_base->ACTSS, 0, 0, 1);
 
+    /* Configure Trigger Event for SS0 as Processor */
+    RegWrite_Bits(&adc_base->EMUX, ADC_TriggerSelect_Processor, 0, 4);
+
+    /* Configure the No. of Samples to be 1 */
+    RegWrite_Bits(&adc_base->SSCTL0, 1, 1, 1);
+
+    /* Configure Trigger Source pin for SS0 as AIN0 for 1st Sample */
+    RegWrite_Bits(&adc_base->SSMUX0, ADC_SampleInput_AIN0, 0, 4);
+
+    /* Enable Sample Sequencer 0*/
+    RegWrite_Bits(&adc_base->ACTSS, 1, 0, 1);
+}
+
+uint16_t ADC_ReadRaw(ADC_Module_e mod)
+{
+    /* Get the Base Address of the ADC Module */
+    ADC0_Type *adc_base = ADC_getBase(mod);
+
+    /* Trigger SS0 in ADC module */
+    RegWrite_Bits(&adc_base->PSSI, 1, 0, 1);
+
+    /* Read the Status of Busy Bit */
+    while(RegRead_Bits(&adc_base->SSFSTAT0, 8, 1))
+    ;
+
+    /* Read the Conversion Results and return */
+    return RegRead_Bits(&adc_base->SSFIFO0, 0, 12);
 }

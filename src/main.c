@@ -72,18 +72,14 @@ int main()
 
   /* Init Interrupts */
   BoardInterrupt_Init();
-
-  int32_t counter = 0;
+  uint16_t adc_val = 0;
   while(1)
   {
-    counter %= 1000;
-    counter++;
+    adc_val = ADC_ReadRaw(ADC_0);
 
     UART_sendString_NonBlocking(&UART_TX_QHandler, "$$P-tod,");
-    UART_sendNumber_NonBlocking(&UART_TX_QHandler, counter);
+    UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc_val);
     UART_sendString_NonBlocking(&UART_TX_QHandler,";");
-
-    delayLoop(100);
   }
 
   return 0;
