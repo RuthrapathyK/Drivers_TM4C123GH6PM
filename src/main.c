@@ -95,20 +95,28 @@ int main()
     SampleCount = 0;
 
     /* Trigger First ADC conversion */
-    ADC_TriggerConversion(ADC_0);
-    //ADC0->PSSI |= 1;
+    //ADC_TriggerConversion(ADC_0);
+    ADC0->PSSI = 1;
 
     /* Wait till Configured No of Conversions are completed */
     while(SampleCount < MAX_ADC_SAMPLE_SIZE)
     ;
 
     GPIO_clearPin(PF1);
+
+    /* Check for any Overflow/Underflow conditions */
+    if((RegRead_Bits(&ADC0->OSTAT, 0, 1)) || (RegRead_Bits(&ADC0->USTAT, 0, 1)))
+    {
+      ASSERT(0);
+    }
+
     for(uint32_t iter = 0; iter < MAX_ADC_SAMPLE_SIZE; iter++)
     {
       UART_sendString_NonBlocking(&UART_TX_QHandler, "$$P-,");
       UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc_val[iter]);
       UART_sendString_NonBlocking(&UART_TX_QHandler,";");
     }
+    delayLoop(1000);
   }
 
   return 0;

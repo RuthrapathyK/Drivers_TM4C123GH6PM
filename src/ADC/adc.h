@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#define MAX_ADC_SAMPLE_SIZE 1000
+#define MAX_ADC_SAMPLE_SIZE 3000
 
 typedef enum{
     ADC_0 = 0,
@@ -17,6 +17,16 @@ typedef enum{
     ADC_SampleRate_500ksps = 0x5,
     ADC_SampleRate_1000ksps = 0x7,
 }ADC_SampleRate_e;
+
+typedef enum{
+    ADC_HWAveraging_Disabled = 0x0,
+    ADC_HWAveraging_2 = 0x1,
+    ADC_HWAveraging_4 = 0x2,
+    ADC_HWAveraging_8 = 0x3,
+    ADC_HWAveraging_16 = 0x4,
+    ADC_HWAveraging_32 = 0x5,
+    ADC_HWAveraging_64 = 0x6,
+}ADC_HWAveraging_e;
 
 typedef enum{
     ADC_ClockSource_Either = 0x0,
