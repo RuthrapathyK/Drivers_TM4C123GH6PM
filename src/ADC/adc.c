@@ -1,5 +1,9 @@
 #include "adc.h"
 
+
+extern uint32_t SampleCount;
+extern uint16_t adc_val[MAX_ADC_SAMPLE_SIZE];
+
 /**
  * @brief Gets the base address of the specified UART module.
  *
@@ -31,6 +35,24 @@ static ADC0_Type* ADC_getBase(ADC_Module_e mod)
   return retval;
 }
 
+void ADC0_Sequence_0_handler(void)
+{
+    /* Clear Interrupt */
+    RegWrite_Bits(&ADC0->ISC, 1, 0, 1);
+
+    /* Do next ADC trigger only when needed */
+    if(SampleCount < MAX_ADC_SAMPLE_SIZE - 1)
+    {
+        /* Trigger SS0 in ADC module */
+        RegWrite_Bits(&ADC0->PSSI, 1, 0, 1); 
+    }
+
+    /* Read Converted Data */
+    adc_val[SampleCount] = RegRead_Bits(&ADC0->SSFIFO0, 0, 12);
+
+    /* Increment the Counter */
+    SampleCount++;
+}
 
 void ADC_Init(ADC_Module_e mod)
 {
@@ -66,8 +88,14 @@ void ADC_Init(ADC_Module_e mod)
     /* Configure the No. of Samples to be 1 */
     RegWrite_Bits(&adc_base->SSCTL0, 1, 1, 1);
 
+    /* Enable Interrupt for Sample 1 of SSO */
+    RegWrite_Bits(&adc_base->SSCTL0, 1, 2, 1);
+
     /* Configure Trigger Source pin for SS0 as AIN0 for 1st Sample */
     RegWrite_Bits(&adc_base->SSMUX0, ADC_SampleInput_AIN0, 0, 4);
+
+    /* Configure ADC Interrupt Mask */
+    RegWrite_Bits(&adc_base->IM, 1, 0, 1);
 
     /* Enable Sample Sequencer 0*/
     RegWrite_Bits(&adc_base->ACTSS, 1, 0, 1);
@@ -87,4 +115,13 @@ uint16_t ADC_ReadRaw(ADC_Module_e mod)
 
     /* Read the Conversion Results and return */
     return RegRead_Bits(&adc_base->SSFIFO0, 0, 12);
+}
+
+void ADC_TriggerConversion(ADC_Module_e mod)
+{
+    /* Get the Base Address of the ADC Module */
+    ADC0_Type *adc_base = ADC_getBase(mod);
+
+    /* Trigger SS0 in ADC module */
+    RegWrite_Bits(&adc_base->PSSI, 1, 0, 1);   
 }

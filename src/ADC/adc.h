@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+#define MAX_ADC_SAMPLE_SIZE 1000
+
 typedef enum{
     ADC_0 = 0,
     ADC_1 = 1,
@@ -63,5 +65,6 @@ typedef struct
 
 void ADC_Init(ADC_Module_e mod);
 uint16_t ADC_ReadRaw(ADC_Module_e mod);
+void ADC_TriggerConversion(ADC_Module_e mod);
 
 #endif

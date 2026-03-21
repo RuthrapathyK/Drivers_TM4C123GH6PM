@@ -4,8 +4,7 @@
 #include "../src/NVIC/nvic.h"
 #include "../src/Queue/queue.h"
 #include "../src/ADC/adc.h"
-
-#define MAX_SAMPLE_SIZE 1000
+#include "../src/GPIO/gpio.h"
 
 uint16_t UART_RX_QBuffer[20] = {0};
 uint8_t UART_TX_QBuffer[20] = {0};
@@ -15,7 +14,9 @@ Queue_t UART_TX_QHandler;
 
 UART_config_t UART0_Handler;
 
-uint16_t adc_val[MAX_SAMPLE_SIZE] = {0};
+uint16_t adc_val[MAX_ADC_SAMPLE_SIZE] = {0};
+
+uint32_t SampleCount = 0;
 
 /**
  * @brief Initializes the board pins for UART communication.
@@ -41,19 +42,28 @@ void BoardPeripheral_Init(void)
 
   /* Init ADC */
   ADC_Init(ADC_0);
+
+  /* Init Test Pin */
+  GPIO_Init(PF1, GPIO_DigitalOutput, GPIO_State_OFF);
 }
+
 void BoardServices_Init(void)
 {
   /* Initialize the Queue for UART */
   Queue_Init(&UART_RX_QHandler, (uint8_t *)UART_RX_QBuffer, sizeof(UART_RX_QBuffer[0]), sizeof(UART_RX_QBuffer) / sizeof(UART_RX_QBuffer[0]));
   Queue_Init(&UART_TX_QHandler, (uint8_t *)UART_TX_QBuffer, sizeof(UART_TX_QBuffer[0]), sizeof(UART_TX_QBuffer) / sizeof(UART_TX_QBuffer[0]));
 }
+
 void BoardInterrupt_Init(void)
 {
+  /* Disable Global Interrupt of the Processor */
   __disable_irq();
 
+  /* Enable NVIC peripheral Interrupt */
   NVIC_enableInterrupt(UART_0_IRQ);
-  
+  NVIC_enableInterrupt(ADC_0_SEQ_0_IRQ);
+
+  /* Enable Global Interrupt of the Processor */
   __enable_irq();
 }
 /**
@@ -79,12 +89,20 @@ int main()
 
   while(1)
   {
-    for(uint32_t iter = 0; iter < MAX_SAMPLE_SIZE; iter++)
-    {
-      adc_val[iter] = ADC_ReadRaw(ADC_0);
-    }
+    GPIO_setPin(PF1);
+
+    /* Clear Counter */
+    SampleCount = 0;
     
-    for(uint32_t iter = 0; iter < MAX_SAMPLE_SIZE; iter++)
+    /* Trigger First ADC conversion */
+    ADC_TriggerConversion(ADC_0);
+
+    /* Wait till Configured No of Conversions are completed */
+    while(SampleCount < MAX_ADC_SAMPLE_SIZE)
+    ;
+
+    GPIO_clearPin(PF1);
+    for(uint32_t iter = 0; iter < MAX_ADC_SAMPLE_SIZE; iter++)
     {
       UART_sendString_NonBlocking(&UART_TX_QHandler, "$$P-,");
       UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc_val[iter]);
