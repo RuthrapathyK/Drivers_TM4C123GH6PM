@@ -39,16 +39,18 @@ void ADC0_Sequence_0_handler(void)
 {
     /* Clear Interrupt */
     RegWrite_Bits(&ADC0->ISC, 1, 0, 1);
-
+    //ADC0->ISC |= 1;
     /* Do next ADC trigger only when needed */
     if(SampleCount < MAX_ADC_SAMPLE_SIZE - 1)
     {
         /* Trigger SS0 in ADC module */
         RegWrite_Bits(&ADC0->PSSI, 1, 0, 1); 
+        //ADC0->PSSI |= 1;
     }
 
     /* Read Converted Data */
     adc_val[SampleCount] = RegRead_Bits(&ADC0->SSFIFO0, 0, 12);
+    //adc_val[SampleCount] = ADC0->SSFIFO0;
 
     /* Increment the Counter */
     SampleCount++;

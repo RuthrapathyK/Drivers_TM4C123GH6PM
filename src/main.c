@@ -93,9 +93,10 @@ int main()
 
     /* Clear Counter */
     SampleCount = 0;
-    
+
     /* Trigger First ADC conversion */
     ADC_TriggerConversion(ADC_0);
+    //ADC0->PSSI |= 1;
 
     /* Wait till Configured No of Conversions are completed */
     while(SampleCount < MAX_ADC_SAMPLE_SIZE)
