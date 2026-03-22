@@ -31,7 +31,7 @@ void BoardPins_Init(void)
   Pin_Config(Port_PA, 1, PA1_U0TX);
 
   /* Configure ADC Pins */
-  Pin_Config(Port_PE, 3, PE3_ANALOG_AIN0);
+  Pin_Config(Port_PD, 2, PD2_ANALOG_AIN5);
 }
 
 void BoardPeripheral_Init(void)
@@ -95,8 +95,7 @@ int main()
     SampleCount = 0;
 
     /* Trigger First ADC conversion */
-    //ADC_TriggerConversion(ADC_0);
-    ADC0->PSSI = 1;
+    ADC_TriggerConversion(ADC_0);
 
     /* Wait till Configured No of Conversions are completed */
     while(SampleCount < MAX_ADC_SAMPLE_SIZE)
