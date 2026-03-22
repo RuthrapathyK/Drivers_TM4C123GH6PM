@@ -15,7 +15,6 @@ Queue_t UART_TX_QHandler;
 UART_config_t UART0_Handler;
 
 uint16_t adc_val[MAX_ADC_SAMPLE_SIZE] = {0};
-
 uint32_t SampleCount = 0;
 
 /**
@@ -96,17 +95,16 @@ int main()
 
     /* Enable SS0 Sample Sequencer to start Continuos Conversion */
     ADC0->ACTSS = 1;
-        /* Wait till Configured No of Conversions are completed */
+    
+    /* Wait till Configured No of Conversions are completed */
     while(SampleCount < MAX_ADC_SAMPLE_SIZE)
     ;
 
-    GPIO_clearPin(PF1);
-
     /* Check for any Overflow/Underflow conditions */
     if((RegRead_Bits(&ADC0->OSTAT, 0, 1)) || (RegRead_Bits(&ADC0->USTAT, 0, 1)))
-    {
       ASSERT(0);
-    }
+    
+    GPIO_clearPin(PF1);
 
     for(uint32_t iter = 0; iter < MAX_ADC_SAMPLE_SIZE; iter++)
     {

@@ -1,9 +1,7 @@
 #include "adc.h"
 
-
-extern uint32_t SampleCount;
 extern uint16_t adc_val[MAX_ADC_SAMPLE_SIZE];
-volatile bool isBeforeEndInterrupt = true;
+extern uint32_t SampleCount;
 
 /**
  * @brief Gets the base address of the specified UART module.
