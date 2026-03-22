@@ -39,38 +39,25 @@ static ADC0_Type* ADC_getBase(ADC_Module_e mod)
 void ADC0_Sequence_0_handler(void)
 {
     /* Clear Interrupt */
-    //RegWrite_Bits(&ADC0->ISC, 1, 0, 1);
     ADC0->ISC = 1; // Direct Register write is needed to achieve the Maximum Sampling Rate 
 
-    if(isBeforeEndInterrupt == true)
-    {
-        /* Do next ADC trigger only when needed */
-        if(SampleCount < MAX_ADC_SAMPLE_SIZE - 1)
-        {
-            /* Trigger SS0 in ADC module */
-            //RegWrite_Bits(&ADC0->PSSI, 1, 0, 1); 
-            ADC0->PSSI = 1; // Direct Register write is needed to achieve the Maximum Sampling Rate 
-        }
-        /* Change the Status of the Switcher */
-        isBeforeEndInterrupt = false;
-        adc_val[SampleCount] = ADC0->SSFIFO0;
-        adc_val[SampleCount + 1] = ADC0->SSFIFO0;
-        adc_val[SampleCount + 2] = ADC0->SSFIFO0;
-        adc_val[SampleCount + 3] = ADC0->SSFIFO0;
-    }
-    else
-    {
-        isBeforeEndInterrupt = true;
-        /* Read Converted Data */
-        //adc_val[SampleCount] = RegRead_Bits(&ADC0->SSFIFO0, 0, 12);
-        adc_val[SampleCount + 4] = ADC0->SSFIFO0;
-        adc_val[SampleCount + 5] = ADC0->SSFIFO0;
-        adc_val[SampleCount + 6] = ADC0->SSFIFO0;
-        adc_val[SampleCount + 7] = ADC0->SSFIFO0;
+    /* Stop Conversion once Configured No of Samples are taken */
+    if(SampleCount >= MAX_ADC_SAMPLE_SIZE - 8)
+        /* Disable SS0 Sample Sequencer to stop Continuos Conversion */
+        ADC0->ACTSS = 0; // Direct Register write is needed to achieve the Maximum Sampling Rate 
 
-        /* Increment the Counter */
-        SampleCount += 8;
-    }
+    /* Read the Conversion Result FIFO */
+    adc_val[SampleCount] = ADC0->SSFIFO0;
+    adc_val[SampleCount + 1] = ADC0->SSFIFO0;
+    adc_val[SampleCount + 2] = ADC0->SSFIFO0;
+    adc_val[SampleCount + 3] = ADC0->SSFIFO0;
+    adc_val[SampleCount + 4] = ADC0->SSFIFO0;
+    adc_val[SampleCount + 5] = ADC0->SSFIFO0;
+    adc_val[SampleCount + 6] = ADC0->SSFIFO0;
+    adc_val[SampleCount + 7] = ADC0->SSFIFO0;
+
+    /* Increment the Counter */
+    SampleCount += 8;
 }
 
 void ADC_Init(ADC_Module_e mod)
@@ -108,13 +95,12 @@ void ADC_Init(ADC_Module_e mod)
     RegWrite_Bits(&adc_base->ACTSS, 0, 0, 1);
 
     /* Configure Trigger Event for SS0 as Processor */
-    RegWrite_Bits(&adc_base->EMUX, ADC_TriggerSelect_Processor, 0, 4);
+    RegWrite_Bits(&adc_base->EMUX, ADC_TriggerSelect_Always, 0, 4);
 
     /* Configure the No. of Samples to be 8 */
     RegWrite_Bits(&adc_base->SSCTL0, 1, 29, 1);
 
     /* Enable Interrupt for Samples of SS0 */
-    RegWrite_Bits(&adc_base->SSCTL0, 1, 26, 1); // 7th Sample
     RegWrite_Bits(&adc_base->SSCTL0, 1, 30, 1); // 8th Sample    
 
     /* Configure Trigger Source pin for SS0 samples */
@@ -129,9 +115,6 @@ void ADC_Init(ADC_Module_e mod)
 
     /* Configure ADC Interrupt Mask */
     RegWrite_Bits(&adc_base->IM, 1, 0, 1);
-
-    /* Enable Sample Sequencer 0*/
-    RegWrite_Bits(&adc_base->ACTSS, 1, 0, 1);
 }
 
 uint16_t ADC_ReadRaw(ADC_Module_e mod)

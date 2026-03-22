@@ -94,10 +94,9 @@ int main()
     /* Clear Counter */
     SampleCount = 0;
 
-    /* Trigger First ADC conversion */
-    ADC_TriggerConversion(ADC_0);
-
-    /* Wait till Configured No of Conversions are completed */
+    /* Enable SS0 Sample Sequencer to start Continuos Conversion */
+    ADC0->ACTSS = 1;
+        /* Wait till Configured No of Conversions are completed */
     while(SampleCount < MAX_ADC_SAMPLE_SIZE)
     ;
 
