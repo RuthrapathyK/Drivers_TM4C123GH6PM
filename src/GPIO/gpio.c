@@ -103,7 +103,7 @@ void GPIO_Init(GPIO_PortPins_e portPin, GPIO_Direction_e direction, GPIO_State_e
         GPIO_clearPin(portPin);
 
     /* Change the PinMux Configuration - All GPIO mode is 0*/
-    Pin_Config(portDerived, pinDerived, 0);
+    Pin_Config(portDerived, pinDerived, PORTPIN_GPIO_FUNCTION);
 }
 
 /**
