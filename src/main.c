@@ -5,6 +5,7 @@
 #include "../src/Queue/queue.h"
 #include "../src/ADC/adc.h"
 #include "../src/GPIO/gpio.h"
+#include "../src/DMA/dma.h"
 
 uint16_t UART_RX_QBuffer[20] = {0};
 uint8_t UART_TX_QBuffer[20] = {0};
@@ -15,7 +16,7 @@ Queue_t UART_TX_QHandler;
 UART_config_t UART0_Handler;
 
 uint16_t adc_val[MAX_ADC_SAMPLE_SIZE] = {0};
-uint32_t SampleCount = 0;
+volatile bool isTransferDone = false;
 
 /**
  * @brief Initializes the board pins for UART communication.
@@ -41,6 +42,9 @@ void BoardPeripheral_Init(void)
 
   /* Init ADC */
   ADC_Init(ADC_0);
+
+  /* Init DMA */
+  DMA_Init(DMA_0);
 
   /* Init Test Pin */
   GPIO_Init(PF1, GPIO_DigitalOutput, GPIO_State_OFF);
@@ -91,19 +95,33 @@ int main()
     GPIO_setPin(PF1);
 
     /* Clear Counter */
-    SampleCount = 0;
+    isTransferDone = false;
+
+    /* Enable DMA transfers */
+    DMA_EnableTransfer(DMA_0);
 
     /* Enable SS0 Sample Sequencer to start Continuos Conversion */
     ADC0->ACTSS = 1;
     
     /* Wait till Configured No of Conversions are completed */
-    while(SampleCount < MAX_ADC_SAMPLE_SIZE)
+    while(!isTransferDone)
     ;
 
     /* Check for any Overflow/Underflow conditions */
-    if((RegRead_Bits(&ADC0->OSTAT, 0, 1)) || (RegRead_Bits(&ADC0->USTAT, 0, 1)))
+    if(RegRead_Bits(&ADC0->OSTAT, 0, 1))
+    {
       ASSERT(0);
+    }
+    else if(RegRead_Bits(&ADC0->USTAT, 0, 1))
+    {
+      ASSERT(0);
+    }
     
+    /* Flush the ADC FIFO */
+    while(!RegRead_Bits(&ADC0->SSFSTAT0, 8, 1))
+    {
+      uint32_t temp = ADC0->SSFIFO0;
+    }
     GPIO_clearPin(PF1);
 
     for(uint32_t iter = 0; iter < MAX_ADC_SAMPLE_SIZE; iter++)

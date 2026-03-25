@@ -1,7 +1,7 @@
 #include "adc.h"
 
 extern uint16_t adc_val[MAX_ADC_SAMPLE_SIZE];
-extern uint32_t SampleCount;
+extern volatile bool isTransferDone;
 
 /**
  * @brief Gets the base address of the specified UART module.
@@ -36,26 +36,13 @@ static ADC0_Type* ADC_getBase(ADC_Module_e mod)
 
 void ADC0_Sequence_0_handler(void)
 {
+    /* Disable SS0 Sample Sequencer to stop Continuos Conversion */
+    ADC0->ACTSS = 0; // Direct Register write is needed to achieve the Maximum Sampling Rate 
+
     /* Clear Interrupt */
-    ADC0->ISC = 1; // Direct Register write is needed to achieve the Maximum Sampling Rate 
+    ADC0->ISC = 1; // Direct Register write is needed to achieve the Maximum Sampling Rate
 
-    /* Stop Conversion once Configured No of Samples are taken */
-    if(SampleCount >= MAX_ADC_SAMPLE_SIZE - 8)
-        /* Disable SS0 Sample Sequencer to stop Continuos Conversion */
-        ADC0->ACTSS = 0; // Direct Register write is needed to achieve the Maximum Sampling Rate 
-
-    /* Read the Conversion Result FIFO */
-    adc_val[SampleCount] = ADC0->SSFIFO0;
-    adc_val[SampleCount + 1] = ADC0->SSFIFO0;
-    adc_val[SampleCount + 2] = ADC0->SSFIFO0;
-    adc_val[SampleCount + 3] = ADC0->SSFIFO0;
-    adc_val[SampleCount + 4] = ADC0->SSFIFO0;
-    adc_val[SampleCount + 5] = ADC0->SSFIFO0;
-    adc_val[SampleCount + 6] = ADC0->SSFIFO0;
-    adc_val[SampleCount + 7] = ADC0->SSFIFO0;
-
-    /* Increment the Counter */
-    SampleCount += 8;
+    isTransferDone = true;
 }
 
 void ADC_Init(ADC_Module_e mod)
@@ -78,7 +65,7 @@ void ADC_Init(ADC_Module_e mod)
     RegWrite_Bits(&adc_base->CC, ADC_ClockSource_Either, 0, 4);
     
     /* Configure Sampling Rate of the ADC Module */
-    RegWrite_Bits(&adc_base->PC, ADC_SampleRate_125ksps, 0, 4);
+    RegWrite_Bits(&adc_base->PC, ADC_SampleRate_1000ksps, 0, 4);
 
     /* Enable Dither */
     RegWrite_Bits(&adc_base->CTL, 1, 6, 1);
@@ -99,6 +86,7 @@ void ADC_Init(ADC_Module_e mod)
     RegWrite_Bits(&adc_base->SSCTL0, 1, 29, 1);
 
     /* Enable Interrupt for Samples of SS0 */
+    RegWrite_Bits(&adc_base->SSCTL0, 1, 14, 1); // 4th Sample 
     RegWrite_Bits(&adc_base->SSCTL0, 1, 30, 1); // 8th Sample    
 
     /* Configure Trigger Source pin for SS0 samples */
@@ -111,8 +99,8 @@ void ADC_Init(ADC_Module_e mod)
     RegWrite_Bits(&adc_base->SSMUX0, ADC_SampleInput_AIN5, 24, 4); // 7th Sample
     RegWrite_Bits(&adc_base->SSMUX0, ADC_SampleInput_AIN5, 28, 4); // 8th Sample
 
-    /* Configure ADC Interrupt Mask */
-    RegWrite_Bits(&adc_base->IM, 1, 0, 1);
+    /* Disable ADC Interrupt Mask as DMA will generate Interrupt of this ADC peripheral */
+    RegWrite_Bits(&adc_base->IM, 0, 0, 1);
 }
 
 uint16_t ADC_ReadRaw(ADC_Module_e mod)

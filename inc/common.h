@@ -43,7 +43,7 @@
 __INLINE__ void RegWrite_Bits(volatile uint32_t * reg, uint32_t reg_val, uint8_t start_bit, uint8_t bit_length)
 {
     /* Check the Input Parameters */
-    ASSERT((reg != NULL) && (start_bit < 32) && (bit_length > 0) && (bit_length <= 32) && (start_bit + bit_length <= 32) && (reg_val < (1UL << bit_length)));
+    ASSERT((reg != NULL) && (start_bit < 32) && (bit_length > 0) && (bit_length <= 32) && (start_bit + bit_length <= 32) && ((uint64_t)reg_val < (uint64_t)((uint64_t)1UL << (uint64_t)bit_length)));
     
     uint32_t temp = *reg;
 
