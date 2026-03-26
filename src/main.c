@@ -130,7 +130,7 @@ int main()
       UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc_val[iter]);
       UART_sendString_NonBlocking(&UART_TX_QHandler,";");
     }
-    //delayLoop(1000);
+    delayLoop(1000);
   }
 
   return 0;
