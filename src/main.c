@@ -110,11 +110,11 @@ int main()
     /* Check for any Overflow/Underflow conditions */
     if(RegRead_Bits(&ADC0->OSTAT, 0, 1))
     {
-//      ASSERT(0);
+      ASSERT(0);
     }
     else if(RegRead_Bits(&ADC0->USTAT, 0, 1))
     {
-//      ASSERT(0);
+     ASSERT(0);
     }
     
     /* Flush the ADC FIFO */

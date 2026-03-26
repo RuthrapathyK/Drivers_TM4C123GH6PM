@@ -333,5 +333,5 @@ typedef struct{
 
 void DMA_Init(DMA_Module_e mod);
 void DMA_EnableTransfer(DMA_Module_e mod);
-
+void DMA_ChannelConfig(DMA_ChannelControl_e channelcontrol, DMA_Channel_e channel, uint32_t *srcPtr, uint32_t *dstPtr, DMA_ControlWord_t cntWord);
 #endif

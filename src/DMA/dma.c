@@ -4,6 +4,7 @@
 __attribute__((aligned(1024))) DMA_ChannelControl_t Channel_Control_Table[DMA_ChannelControl_Max][DMA_Channel_Max] = {0};
 
 extern uint16_t adc_val[MAX_ADC_SAMPLE_SIZE];
+DMA_ControlWord_t ControlWord;
 
 static UDMA_Type * DMA_getBase(DMA_Module_e mod)
 {
@@ -27,7 +28,7 @@ static UDMA_Type * DMA_getBase(DMA_Module_e mod)
     return retval;
 }
 
-static void DMA_ChannelConfig(DMA_ChannelControl_e channelcontrol, DMA_Channel_e channel, uint32_t *srcPtr, uint32_t *dstPtr, DMA_ControlWord_t cntWord)
+void DMA_ChannelConfig(DMA_ChannelControl_e channelcontrol, DMA_Channel_e channel, uint32_t *srcPtr, uint32_t *dstPtr, DMA_ControlWord_t cntWord)
 {
     Channel_Control_Table[channelcontrol][channel].Source_End_Pointer = srcPtr;
     Channel_Control_Table[channelcontrol][channel].Destination_End_Pointer = dstPtr;
@@ -82,8 +83,6 @@ void DMA_EnableTransfer(DMA_Module_e mod)
 {
     /* Check the Preconditions */
     ASSERT(mod < DMA_Max);
-   
-    DMA_ControlWord_t ControlWord;
 
     /* Get Base Address of DMA controller */
     UDMA_Type *dma_base = DMA_getBase(DMA_0);

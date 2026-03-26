@@ -1,7 +1,9 @@
 #include "adc.h"
+#include "../src/DMA/dma.h"
 
 extern uint16_t adc_val[MAX_ADC_SAMPLE_SIZE];
 extern volatile bool isTransferDone;
+extern DMA_ControlWord_t ControlWord;
 uint32_t SampleCount = 0;
 
 /**
@@ -42,12 +44,20 @@ void ADC0_Sequence_0_handler(void)
 
     SampleCount += 1024;
 
-    if(SampleCount >= 2048)
+    if(SampleCount >= MAX_ADC_SAMPLE_SIZE)
     {
         /* Disable SS0 Sample Sequencer to stop Continuos Conversion */
         ADC0->ACTSS = 0; // Direct Register write is needed to achieve the Maximum Sampling Rate 
 
         isTransferDone = true;
+    }
+    else if(SampleCount == 2048)
+    {
+        DMA_ChannelConfig(DMA_ChannelControl_Secondary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[4096 - 1], ControlWord);
+    }
+    else if(SampleCount == 1024)
+    {
+        DMA_ChannelConfig(DMA_ChannelControl_Primary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[3072 - 1], ControlWord);
     }
 }
 
@@ -71,7 +81,7 @@ void ADC_Init(ADC_Module_e mod)
     RegWrite_Bits(&adc_base->CC, ADC_ClockSource_Either, 0, 4);
     
     /* Configure Sampling Rate of the ADC Module */
-    RegWrite_Bits(&adc_base->PC, ADC_SampleRate_250ksps, 0, 4);
+    RegWrite_Bits(&adc_base->PC, ADC_SampleRate_1000ksps, 0, 4);
 
     /* Enable Dither */
     RegWrite_Bits(&adc_base->CTL, 1, 6, 1);
