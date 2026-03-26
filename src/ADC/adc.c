@@ -2,6 +2,7 @@
 
 extern uint16_t adc_val[MAX_ADC_SAMPLE_SIZE];
 extern volatile bool isTransferDone;
+uint32_t SampleCount = 0;
 
 /**
  * @brief Gets the base address of the specified UART module.
@@ -36,13 +37,18 @@ static ADC0_Type* ADC_getBase(ADC_Module_e mod)
 
 void ADC0_Sequence_0_handler(void)
 {
-    /* Disable SS0 Sample Sequencer to stop Continuos Conversion */
-    ADC0->ACTSS = 0; // Direct Register write is needed to achieve the Maximum Sampling Rate 
-
     /* Clear Interrupt */
     ADC0->ISC = 1; // Direct Register write is needed to achieve the Maximum Sampling Rate
 
-    isTransferDone = true;
+    SampleCount += 1024;
+
+    if(SampleCount >= 2048)
+    {
+        /* Disable SS0 Sample Sequencer to stop Continuos Conversion */
+        ADC0->ACTSS = 0; // Direct Register write is needed to achieve the Maximum Sampling Rate 
+
+        isTransferDone = true;
+    }
 }
 
 void ADC_Init(ADC_Module_e mod)
@@ -65,7 +71,7 @@ void ADC_Init(ADC_Module_e mod)
     RegWrite_Bits(&adc_base->CC, ADC_ClockSource_Either, 0, 4);
     
     /* Configure Sampling Rate of the ADC Module */
-    RegWrite_Bits(&adc_base->PC, ADC_SampleRate_1000ksps, 0, 4);
+    RegWrite_Bits(&adc_base->PC, ADC_SampleRate_250ksps, 0, 4);
 
     /* Enable Dither */
     RegWrite_Bits(&adc_base->CTL, 1, 6, 1);

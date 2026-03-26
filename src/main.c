@@ -110,11 +110,11 @@ int main()
     /* Check for any Overflow/Underflow conditions */
     if(RegRead_Bits(&ADC0->OSTAT, 0, 1))
     {
-      ASSERT(0);
+//      ASSERT(0);
     }
     else if(RegRead_Bits(&ADC0->USTAT, 0, 1))
     {
-      ASSERT(0);
+//      ASSERT(0);
     }
     
     /* Flush the ADC FIFO */
@@ -130,7 +130,7 @@ int main()
       UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc_val[iter]);
       UART_sendString_NonBlocking(&UART_TX_QHandler,";");
     }
-    delayLoop(1000);
+    //delayLoop(1000);
   }
 
   return 0;

@@ -72,7 +72,7 @@ void DMA_Init(DMA_Module_e mod)
     RegWrite_Bits(&dma_base->USEBURSTSET, 1, 14, 1);
 
     /* Configure Channel(i.e. Channel 14) to use Primary Control Structure */
-    RegWrite_Bits(&dma_base->ALTCLR, 1, 14, 1);
+    //RegWrite_Bits(&dma_base->ALTCLR, 1, 14, 1);
 
     /* Enable ADC0 SS0 request in Channel Mask */
     RegWrite_Bits(&dma_base->REQMASKCLR, 1, 14, 1);
@@ -93,12 +93,13 @@ void DMA_EnableTransfer(DMA_Module_e mod)
     ControlWord.DSTINC = DMA_ChannelControl_HalfWord;
     ControlWord.DSTSIZE = DMA_ChannelControl_HalfWord;
     ControlWord.ARBSIZE = DMA_ChannelControl_Arbitration_4;
-    ControlWord.XFERSIZE = MAX_ADC_SAMPLE_SIZE - 1;
+    ControlWord.XFERSIZE = 1024 - 1;
     ControlWord.NXTUSEBURST = 0;
-    ControlWord.XFERMODE = DMA_ChannelControl_XFERMode_Basic;
+    ControlWord.XFERMODE = DMA_ChannelControl_XFERMode_PingPong;
 
     /* Configure Control Structure of the Channel(i.e. Channel 14) */
-    DMA_ChannelConfig(DMA_ChannelControl_Primary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[MAX_ADC_SAMPLE_SIZE - 1], ControlWord);
+    DMA_ChannelConfig(DMA_ChannelControl_Primary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[1024 - 1], ControlWord);
+    DMA_ChannelConfig(DMA_ChannelControl_Secondary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[2048 - 1], ControlWord);
 
     /* Enable the Channel(i.e Channel 14) to Start the Transfer */
     RegWrite_Bits(&dma_base->ENASET, 1, 14, 1);

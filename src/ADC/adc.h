@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#define MAX_ADC_SAMPLE_SIZE 1000
+#define MAX_ADC_SAMPLE_SIZE 2048
 
 typedef enum{
     ADC_0 = 0,
