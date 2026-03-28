@@ -4,7 +4,7 @@
 extern uint16_t adc_val[MAX_ADC_SAMPLE_SIZE];
 extern volatile bool isTransferDone;
 extern DMA_ControlWord_t ControlWord;
-uint32_t SampleCount = 0;
+uint32_t volatile SampleCount = 0;
 
 /**
  * @brief Gets the base address of the specified UART module.

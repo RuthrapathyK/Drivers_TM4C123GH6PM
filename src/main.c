@@ -17,6 +17,7 @@ UART_config_t UART0_Handler;
 
 uint16_t adc_val[MAX_ADC_SAMPLE_SIZE] = {0};
 volatile bool isTransferDone = false;
+extern volatile uint32_t SampleCount;
 
 /**
  * @brief Initializes the board pins for UART communication.
@@ -96,6 +97,7 @@ int main()
 
     /* Clear Counter */
     isTransferDone = false;
+    SampleCount = 0;
 
     /* Enable DMA transfers */
     DMA_EnableTransfer(DMA_0);
@@ -120,7 +122,7 @@ int main()
     /* Flush the ADC FIFO */
     while(!RegRead_Bits(&ADC0->SSFSTAT0, 8, 1))
     {
-      uint32_t temp = ADC0->SSFIFO0;
+      uint32_t volatile temp = ADC0->SSFIFO0;
     }
     GPIO_clearPin(PF1);
 
@@ -129,6 +131,7 @@ int main()
       UART_sendString_NonBlocking(&UART_TX_QHandler, "$$P-,");
       UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc_val[iter]);
       UART_sendString_NonBlocking(&UART_TX_QHandler,";");
+      adc_val[iter] = 0;
     }
     delayLoop(1000);
   }
