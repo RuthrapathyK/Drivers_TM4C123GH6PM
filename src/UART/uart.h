@@ -137,6 +137,15 @@ void UART_receiveString(uint8_t * strBuf);
  */
 void UART_sendString_NonBlocking(Queue_t *inst, char * str);
 
+/**
+ * @brief Sends a signed 32-bit integer as ASCII characters over UART using non-blocking transmission.
+ *
+ * Converts the number to an ASCII string and sends it using UART_sendString_NonBlocking.
+ * The transmission is performed via interrupt-driven queue-based mechanism.
+ *
+ * @param inst Pointer to the UART transmission queue instance
+ * @param num Number to send
+ */
 void UART_sendNumber_NonBlocking(Queue_t *inst, int32_t num);
 
 #endif

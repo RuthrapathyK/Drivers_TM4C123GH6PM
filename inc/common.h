@@ -40,6 +40,18 @@
   }
 #endif
 
+/**
+ * @brief Writes bits at a specified position in a register.
+ *
+ * Modifies specific bits within a register by clearing the target bit range and writing
+ * the provided value at the specified position. Preserves all other bits in the register.
+ * Validates all parameters to ensure bit operations remain within register bounds.
+ *
+ * @param reg Pointer to the register to modify
+ * @param reg_val Value to write at the specified bit position
+ * @param start_bit Starting bit position (0-31)
+ * @param bit_length Number of bits to write (1-32, must not exceed register width)
+ */
 void RegWrite_Bits(volatile uint32_t * reg, uint32_t reg_val, uint8_t start_bit, uint8_t bit_length);
 /**
  * @brief Reads bits from a specified position in a register.

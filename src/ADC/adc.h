@@ -68,6 +68,13 @@ typedef enum{
     ADC_SampleInput_AIN11 = 11
 }ADC_SampleInput_e;
 
+typedef enum{
+    ADC_SampleSequencer_0 = 0,
+    ADC_SampleSequencer_1 = 1,
+    ADC_SampleSequencer_2 = 2,
+    ADC_SampleSequencer_3 = 3,
+}ADC_SampleSequencer_e;
+
 typedef struct 
 {
     uint8_t dummy;
@@ -76,5 +83,7 @@ typedef struct
 void ADC_Init(ADC_Module_e mod);
 uint16_t ADC_ReadRaw(ADC_Module_e mod);
 void ADC_TriggerConversion(ADC_Module_e mod);
+void ADC_SynchronizationCheck(void);
+void ADC_FlushFIFO(ADC_SampleSequencer_e sequencer);
 
 #endif

@@ -35,6 +35,13 @@ void BoardPins_Init(void)
   Pin_Config(Port_PD, 2, PD2_ANALOG_AIN5);
 }
 
+/**
+ * @brief Initializes all board peripherals.
+ *
+ * Configures and enables UART0, ADC0, DMA0 modules and GPIO test pin (Port F1).
+ * Must be called during system initialization to set up core communication and
+ * data acquisition interfaces.
+ */
 void BoardPeripheral_Init(void)
 {
   /* Init UART */
@@ -51,6 +58,12 @@ void BoardPeripheral_Init(void)
   GPIO_Init(PF1, GPIO_DigitalOutput, GPIO_State_OFF);
 }
 
+/**
+ * @brief Initializes board communication services.
+ *
+ * Creates and configures receive and transmit queues for UART0 communication.
+ * These queues are used for non-blocking interrupt-driven UART data transfer.
+ */
 void BoardServices_Init(void)
 {
   /* Initialize the Queue for UART */
@@ -58,6 +71,13 @@ void BoardServices_Init(void)
   Queue_Init(&UART_TX_QHandler, (uint8_t *)UART_TX_QBuffer, sizeof(UART_TX_QBuffer[0]), sizeof(UART_TX_QBuffer) / sizeof(UART_TX_QBuffer[0]));
 }
 
+/**
+ * @brief Initializes NVIC interrupt configuration.
+ *
+ * Disables global interrupts, enables UART0 and ADC0 sequence 0 interrupts in the NVIC,
+ * then re-enables global interrupts. Must be called after peripheral initialization
+ * to enable interrupt-driven peripheral operation.
+ */
 void BoardInterrupt_Init(void)
 {
   /* Disable Global Interrupt of the Processor */
@@ -99,6 +119,9 @@ int main()
     isTransferDone = false;
     SampleCount = 0;
 
+    /* Flush the FIFO so that unread data will not cause Overflow */
+    ADC_FlushFIFO(ADC_SampleSequencer_0);
+
     /* Enable DMA transfers */
     DMA_EnableTransfer(DMA_0);
 
@@ -109,21 +132,9 @@ int main()
     while(!isTransferDone)
     ;
 
-    /* Check for any Overflow/Underflow conditions */
-    if(RegRead_Bits(&ADC0->OSTAT, 0, 1))
-    {
-      ASSERT(0);
-    }
-    else if(RegRead_Bits(&ADC0->USTAT, 0, 1))
-    {
-     ASSERT(0);
-    }
+    /* Check any Underflow or Overflow has happened in the Sample collection */
+    ADC_SynchronizationCheck();
     
-    /* Flush the ADC FIFO */
-    while(!RegRead_Bits(&ADC0->SSFSTAT0, 8, 1))
-    {
-      uint32_t volatile temp = ADC0->SSFIFO0;
-    }
     GPIO_clearPin(PF1);
 
     for(uint32_t iter = 0; iter < MAX_ADC_SAMPLE_SIZE; iter++)

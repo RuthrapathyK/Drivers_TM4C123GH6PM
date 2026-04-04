@@ -6,6 +6,15 @@ __attribute__((aligned(1024))) DMA_ChannelControl_t Channel_Control_Table[DMA_Ch
 extern uint16_t adc_val[MAX_ADC_SAMPLE_SIZE];
 DMA_ControlWord_t ControlWord;
 
+/**
+ * @brief Gets the base address of the specified DMA module.
+ *
+ * Returns the memory base address for the given DMA module for register access.
+ * Currently only DMA_0 is supported on this microcontroller.
+ *
+ * @param mod The DMA module identifier
+ * @return Pointer to the DMA (UDMA) module's base address
+ */
 static UDMA_Type * DMA_getBase(DMA_Module_e mod)
 {
     /* Check the Preconditions */

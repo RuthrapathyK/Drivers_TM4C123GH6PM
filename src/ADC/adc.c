@@ -7,12 +7,12 @@ extern DMA_ControlWord_t ControlWord;
 uint32_t volatile SampleCount = 0;
 
 /**
- * @brief Gets the base address of the specified UART module.
+ * @brief Gets the base address of the specified ADC module.
  *
- * Returns the memory base address for the given UART module for register access.
+ * Returns the memory base address for the given ADC module for register access.
  *
- * @param mod The UART module identifier
- * @return Pointer to the UART module's base address
+ * @param mod The ADC module identifier
+ * @return Pointer to the ADC module's base address
  */
 static ADC0_Type* ADC_getBase(ADC_Module_e mod)
 {
@@ -37,6 +37,14 @@ static ADC0_Type* ADC_getBase(ADC_Module_e mod)
   return retval;
 }
 
+/**
+ * @brief Interrupt handler for ADC0 Sample Sequencer 0.
+ *
+ * Clears the ADC interrupt, increments the sample count by 1024 samples,
+ * and disables continuous sampler when maximum sample size is reached.
+ * Additionally manages DMA channel reconfiguration for ping-pong buffering
+ * at intermediate sample count milestones to support continuous acquisition.
+ */
 void ADC0_Sequence_0_handler(void)
 {
     /* Clear Interrupt */
@@ -61,6 +69,16 @@ void ADC0_Sequence_0_handler(void)
     }
 }
 
+/**
+ * @brief Initializes the ADC module with default configuration.
+ *
+ * Configures the specified ADC module with clock settings (125 ksps sampling rate),
+ * sample sequencer 0 with 8 samples from AIN5 input, processor trigger mode,
+ * hardware averaging disabled, and dither enabled. Disables interrupt masking
+ * for DMA-driven operation. Must be called before triggering conversions.
+ *
+ * @param mod The ADC module to initialize
+ */
 void ADC_Init(ADC_Module_e mod)
 {
     /* Reset the ADC module */
@@ -119,6 +137,15 @@ void ADC_Init(ADC_Module_e mod)
     RegWrite_Bits(&adc_base->IM, 0, 0, 1);
 }
 
+/**
+ * @brief Reads raw 12-bit ADC conversion result in blocking mode.
+ *
+ * Triggers ADC sample sequencer 0 conversion and waits until the conversion
+ * completes. Returns the raw 12-bit conversion result from the ADC FIFO.
+ *
+ * @param mod The ADC module to read from
+ * @return Raw 12-bit ADC conversion value (0-4095)
+ */
 uint16_t ADC_ReadRaw(ADC_Module_e mod)
 {
     /* Get the Base Address of the ADC Module */
@@ -135,6 +162,15 @@ uint16_t ADC_ReadRaw(ADC_Module_e mod)
     return RegRead_Bits(&adc_base->SSFIFO0, 0, 12);
 }
 
+/**
+ * @brief Triggers ADC sample sequencer 0 conversion.
+ *
+ * Non-blocking trigger of ADC sample sequencer 0. Used in DMA-driven continuous
+ * conversion mode to initiate conversions that transfer data via DMA instead of
+ * polling. The completion can be monitored via the interrupt handler.
+ *
+ * @param mod The ADC module to trigger
+ */
 void ADC_TriggerConversion(ADC_Module_e mod)
 {
     /* Get the Base Address of the ADC Module */
@@ -142,4 +178,70 @@ void ADC_TriggerConversion(ADC_Module_e mod)
 
     /* Trigger SS0 in ADC module */
     RegWrite_Bits(&adc_base->PSSI, 1, 0, 1);   
+}
+
+/**
+ * @brief Checks for ADC overflow and underflow conditions.
+ *
+ * Verifies ADC0 operation for any overflow or underflow errors that may indicate
+ * data loss or synchronization issues. Triggers an assertion if either condition
+ * is detected, halting execution for debugging purposes.
+ */
+void ADC_SynchronizationCheck(void)
+{  
+    /* Check for any Overflow */
+    if(RegRead_Bits(&ADC0->OSTAT, 0, 1))
+    {
+      ASSERT(0);
+    }
+
+    /* Underflow conditions */
+    if(RegRead_Bits(&ADC0->USTAT, 0, 1))
+    {
+     ASSERT(0);
+    }
+}
+
+/**
+ * @brief Flushes the FIFO of the specified ADC sample sequencer.
+ *
+ * Empties the FIFO buffer for the specified sample sequencer by reading and
+ * discarding all pending data until the FIFO is empty. Useful for clearing
+ * stale data before starting new conversions or after error conditions.
+ *
+ * @param seq The ADC sample sequencer FIFO to flush
+ */
+void ADC_FlushFIFO(ADC_SampleSequencer_e seq)
+{
+    volatile uint32_t *reg_stat = 0;
+    uint32_t temp = 0;
+
+    /* Get the Address of Sample Sequencer Status Register */
+    switch(seq)
+    {
+        case ADC_SampleSequencer_0:
+            reg_stat = &ADC0->SSFSTAT0;
+            break;
+        case ADC_SampleSequencer_1:
+            reg_stat = &ADC0->SSFSTAT1;
+            break;
+        case ADC_SampleSequencer_2:
+            reg_stat = &ADC0->SSFSTAT2;
+            break;
+        case ADC_SampleSequencer_3:
+            reg_stat = &ADC0->SSFSTAT3;
+            break;
+        default:
+            ASSERT(0);
+            break;
+    }
+
+    /* Flush the ADC FIFO */
+    while(!RegRead_Bits(reg_stat, 8, 1))
+    {
+      temp = ADC0->SSFIFO0;
+    }
+
+    /* Unused Variable */
+    (void)temp;
 }

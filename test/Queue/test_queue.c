@@ -8,14 +8,31 @@
 
 bool isAsserted = false;
 
+/**
+ * @brief Test setup function - called before each test case.
+ *
+ * Initializes test environment for queue tests.
+ */
 void setUp(void)
 {
 }
 
+/**
+ * @brief Test teardown function - called after each test case.
+ *
+ * Cleans up resources and test state after queue test execution.
+ */
 void tearDown(void)
 {
 }
 
+/**
+ * @brief Test queue enqueue/dequeue with bit-field struct elements.
+ *
+ * Verifies that Queue_Init, Queue_Enqueue, and Queue_Dequeue correctly handle
+ * complex data types containing bit-fields, preserving bit-field values through
+ * the queue transfer operation.
+ */
 void test_queue_1(void)
 { 
     typedef struct{
@@ -42,6 +59,13 @@ void test_queue_1(void)
     TEST_ASSERT_EQUAL_HEX(Obj_1.data4, Obj_2.data4);
 }
 
+/**
+ * @brief Test queue overflow behavior and state management.
+ *
+ * Verifies that the queue correctly handles enqueue operations at capacity limit
+ * and maintains proper state when the buffer is full. Tests overflow detection
+ * and queue state consistency.
+ */
 void test_queue_2(void)
 { 
     uint8_t test_buff[3];
