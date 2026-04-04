@@ -67,10 +67,10 @@ void ADC_Init(ADC_Module_e mod)
     RegWrite_Bits(&SYSCTL->SRADC, 1, mod, 1);
     RegWrite_Bits(&SYSCTL->SRADC, 0, mod, 1);
 
-    /* Enable Clock for UART0 module */
+    /* Enable Clock for ADC module */
     RegWrite_Bits(&SYSCTL->RCGCADC, 1, mod, 1);
 
-    /* Wait till UART module is Enabled */
+    /* Wait till ADC module is Enabled */
     while(!RegRead_Bits(&SYSCTL->PRADC, mod, 1))
     ;
 
@@ -81,7 +81,7 @@ void ADC_Init(ADC_Module_e mod)
     RegWrite_Bits(&adc_base->CC, ADC_ClockSource_Either, 0, 4);
     
     /* Configure Sampling Rate of the ADC Module */
-    RegWrite_Bits(&adc_base->PC, ADC_SampleRate_1000ksps, 0, 4);
+    RegWrite_Bits(&adc_base->PC, ADC_SampleRate_125ksps, 0, 4);
 
     /* Enable Dither */
     RegWrite_Bits(&adc_base->CTL, 1, 6, 1);
