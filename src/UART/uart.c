@@ -431,23 +431,24 @@ void UART_receiveString(uint8_t * strBuf)
  */
 void UART_sendString_NonBlocking(Queue_t *inst, char * str)
 {
-  bool isFirstData = true;
-  
+
   while(*str)
   {
-    /* Check if previous Transaction is completed and Send First data directly */
-    if((isFirstData == true) && (Queue_isEmpty(inst) == Queue_Empty))
+    /* Check if the Queue is Empty as Empty Queue needs ISR to be triggered for continuous transmission */
+    if(Queue_isEmpty(inst) == Queue_Empty)
     {
-      isFirstData = false;
-
       /* Send Data by writing the register */
       UART_sendChar(*str);
+
+      /* Point to Next Data for Transmission */
       str++;
     }
     else if(Queue_isFull(inst) == Queue_NotFull)
     {
       /* Add Data to the Queue */
       Queue_Enqueue(inst, (uint8_t *)str);
+
+      /* Point to Next Data for Transmission */
       str++;
     }
     else
