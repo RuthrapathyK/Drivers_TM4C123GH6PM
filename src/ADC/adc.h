@@ -75,10 +75,10 @@ typedef enum{
     ADC_SampleSequencer_3 = 3,
 }ADC_SampleSequencer_e;
 
-typedef struct 
-{
-    uint8_t dummy;
-}ADC_Config_t;
+typedef enum{
+    ADC_Dither_Disable = 0,
+    ADC_Dither_Enable = 1
+}ADC_DitherSetting_e;
 
 void ADC_Init(ADC_Module_e mod);
 uint16_t ADC_ReadRaw(ADC_Module_e mod);

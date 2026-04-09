@@ -102,7 +102,7 @@ void ADC_Init(ADC_Module_e mod)
     RegWrite_Bits(&adc_base->PC, ADC_SampleRate_125ksps, 0, 4);
 
     /* Enable Dither */
-    RegWrite_Bits(&adc_base->CTL, 1, 6, 1);
+    RegWrite_Bits(&adc_base->CTL, ADC_Dither_Enable, 6, 1);
 
     /* Set Hardware Averaging */
     RegWrite_Bits(&adc_base->SAC, ADC_HWAveraging_Disabled, 0, 4);
