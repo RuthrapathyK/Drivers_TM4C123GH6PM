@@ -60,32 +60,32 @@ void UART0_handler(void)
   switch(isr_status)
   {
     case UART_ISR_EVT_RECEIVE:
-          RegWrite_Bits(&UART0->ICR, 1, 4, 1); // Clear the Interrupt
+          REG_WRITE(UART0->ICR, 1, 4, 1); // Clear the Interrupt
           UART_RxHandler();
           break;
 
     case UART_ISR_EVT_TRANSMIT:
-          RegWrite_Bits(&UART0->ICR, 1, 5, 1); // Clear the Interrupt
+          REG_WRITE(UART0->ICR, 1, 5, 1); // Clear the Interrupt
           UART_TxHandler();
           break;
 
     case UART_ISR_EVT_FRAME_ERROR:
-          RegWrite_Bits(&UART0->ICR, 1, 7, 1); // Clear the Interrupt
+          REG_WRITE(UART0->ICR, 1, 7, 1); // Clear the Interrupt
           ASSERT(0);
           break;
     
     case UART_ISR_EVT_PARITY_ERROR:
-          RegWrite_Bits(&UART0->ICR, 1, 8, 1); // Clear the Interrupt
+          REG_WRITE(UART0->ICR, 1, 8, 1); // Clear the Interrupt
           ASSERT(0);
           break;
 
     case UART_ISR_EVT_BREAK_ERROR:
-          RegWrite_Bits(&UART0->ICR, 1, 9, 1); // Clear the Interrupt
+          REG_WRITE(UART0->ICR, 1, 9, 1); // Clear the Interrupt
           ASSERT(0);
           break;
 
     case UART_ISR_EVT_OVERRUN_ERROR:
-          RegWrite_Bits(&UART0->ICR, 1, 10, 1); // Clear the Interrupt
+          REG_WRITE(UART0->ICR, 1, 10, 1); // Clear the Interrupt
           ASSERT(0);
           break;
 
@@ -163,11 +163,11 @@ bool UART_setBaudRate(UART0_Type* base, uint32_t SystemClock, uint32_t expectedB
   uint8_t Baud_Fraction = (uint8_t)((((float)Baud_Val - (float)Baud_Integer) * 64.0f) + 0.5f); // Derive the Fraction part of the Value
 
   /* Write the Baudrate */
-  RegWrite_Bits(&base->IBRD, Baud_Integer, 0, 16);
-  RegWrite_Bits(&base->FBRD, Baud_Fraction, 0, 6);
+  RegWrite_Bits_ASSERT(&base->IBRD, Baud_Integer, 0, 16);
+  RegWrite_Bits_ASSERT(&base->FBRD, Baud_Fraction, 0, 6);
 
   /* Set prescaler to be 8 */
-  RegWrite_Bits(&base->CTL, 1, 5, 1); // Select UART prescaler as 8
+  REG_WRITE(base->CTL, 1, 5, 1); // Select UART prescaler as 8
 
   return true;
 }
@@ -207,11 +207,11 @@ void UART_Init(UART_Module_e mod, UART_config_t *cfg)
   UART0_Type * uart_base = 0;
 
   /* Reset the UART module */
-  RegWrite_Bits(&SYSCTL->SRUART, 1, mod, 1);
-  RegWrite_Bits(&SYSCTL->SRUART, 0, mod, 1);
+  RegWrite_Bits_ASSERT(&SYSCTL->SRUART, 1, mod, 1);
+  RegWrite_Bits_ASSERT(&SYSCTL->SRUART, 0, mod, 1);
 
   /* Enable Clock for UART module */
-  RegWrite_Bits(&SYSCTL->RCGCUART, 1, mod, 1);
+  RegWrite_Bits_ASSERT(&SYSCTL->RCGCUART, 1, mod, 1);
 
   /* Wait till UART module is Enabled */
   while(!RegRead_Bits(&SYSCTL->PRUART, mod, 1))
@@ -221,39 +221,39 @@ void UART_Init(UART_Module_e mod, UART_config_t *cfg)
   uart_base = UART_getBase(mod);
   
   /* Disable UART */
-  RegWrite_Bits(&uart_base->CTL, 0, 0, 1);
+  REG_WRITE(uart_base->CTL, 0, 0, 1);
   
   /* Set the Expected Baudrate */
   UART_setBaudRate(uart_base, SYSTEM_CLOCK_FREQ, cfg->UART_BaudRate);
 
   /* Configure Stopbit */
-  RegWrite_Bits(&uart_base->LCRH, cfg->UART_StopBit, 3, 1);
+  RegWrite_Bits_ASSERT(&uart_base->LCRH, cfg->UART_StopBit, 3, 1);
 
   /* Configure Parity*/
-  RegWrite_Bits(&uart_base->LCRH, cfg->UART_Parity, 1, 2);
+  RegWrite_Bits_ASSERT(&uart_base->LCRH, cfg->UART_Parity, 1, 2);
 
   /* Configure FIFOs*/
-  RegWrite_Bits(&uart_base->LCRH, cfg->UART_Fifo, 4, 1);
+  RegWrite_Bits_ASSERT(&uart_base->LCRH, cfg->UART_Fifo, 4, 1);
 
   /* Select UART module's clock source - System Clock(16MHz) */
-  RegWrite_Bits(&uart_base->CC, 0, 0, 4);
+  REG_WRITE(uart_base->CC, 0, 0, 4);
 
   /* Configure Word Length*/
-  RegWrite_Bits(&uart_base->LCRH, cfg->UART_WordLength, 5, 2);
+  RegWrite_Bits_ASSERT(&uart_base->LCRH, cfg->UART_WordLength, 5, 2);
 
   /* Enable EOT - Trigger Interrpt after last bit cleared the serializer */
-  RegWrite_Bits(&uart_base->CTL, 1, 4, 1);
+  REG_WRITE(uart_base->CTL, 1, 4, 1);
 
   /* Define Interrupt Masks */
-  RegWrite_Bits(&uart_base->IM, 1, 4, 1);  // Receive Interrupt Mask
-  RegWrite_Bits(&uart_base->IM, 1, 5, 1);  // Transmit Interrupt Mask
-  RegWrite_Bits(&uart_base->IM, 1, 7, 1);  // Framing Error Interrupt Mask
-  RegWrite_Bits(&uart_base->IM, 1, 8, 1);  // Parity Error Interrupt Mask
-  RegWrite_Bits(&uart_base->IM, 1, 9, 1);  // Break Error Interrupt Mask
-  RegWrite_Bits(&uart_base->IM, 1, 10, 1); // Overrun Error Interrupt Mask
+  REG_WRITE(uart_base->IM, 1, 4, 1);  // Receive Interrupt Mask
+  REG_WRITE(uart_base->IM, 1, 5, 1);  // Transmit Interrupt Mask
+  REG_WRITE(uart_base->IM, 1, 7, 1);  // Framing Error Interrupt Mask
+  REG_WRITE(uart_base->IM, 1, 8, 1);  // Parity Error Interrupt Mask
+  REG_WRITE(uart_base->IM, 1, 9, 1);  // Break Error Interrupt Mask
+  REG_WRITE(uart_base->IM, 1, 10, 1); // Overrun Error Interrupt Mask
 
   /* Enable UART */
-  RegWrite_Bits(&uart_base->CTL, 1, 0, 1);
+  REG_WRITE(uart_base->CTL, 1, 0, 1);
 }
 
 /**

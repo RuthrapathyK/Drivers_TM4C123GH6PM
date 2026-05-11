@@ -48,14 +48,14 @@ static ADC0_Type* ADC_getBase(ADC_Module_e mod)
 void ADC0_Sequence_0_handler(void)
 {
     /* Clear Interrupt */
-    REG_SET_BIT(&ADC0->ISC, 0); // Direct Register write is needed to achieve the Maximum Sampling Rate
+    REG_SET_BIT(ADC0->ISC, 0); // Direct Register write is needed to achieve the Maximum Sampling Rate
        
     SampleCount += 1024;
 
     if(SampleCount >= MAX_ADC_SAMPLE_SIZE)
     {
         /* Disable SS0 Sample Sequencer to stop Continuos Conversion */
-        REG_CLEAR_BIT(&ADC0->ACTSS, 0); // Direct Register write is needed to achieve the Maximum Sampling Rate 
+        REG_CLEAR_BIT(ADC0->ACTSS, 0); // Direct Register write is needed to achieve the Maximum Sampling Rate 
         isTransferDone = true;
     }
     else if(SampleCount == 2048)
@@ -81,8 +81,8 @@ void ADC0_Sequence_0_handler(void)
 void ADC_Init(ADC_Module_e mod)
 {
     /* Reset the ADC module */
-    RegWrite_Bits(&SYSCTL->SRADC, 1, mod, 1);
-    RegWrite_Bits(&SYSCTL->SRADC, 0, mod, 1);
+    RegWrite_Bits_ASSERT(&SYSCTL->SRADC, 1, mod, 1);
+    RegWrite_Bits_ASSERT(&SYSCTL->SRADC, 0, mod, 1);
 
     /* Enable Clock for ADC module */
     RegWrite_Bits(&SYSCTL->RCGCADC, 1, mod, 1);
@@ -95,45 +95,45 @@ void ADC_Init(ADC_Module_e mod)
     ADC0_Type *adc_base = ADC_getBase(mod);
 
     /* Configure Clock Source for ADC Module */
-    RegWrite_Bits(&adc_base->CC, ADC_ClockSource_Either, 0, 4);
+    REG_WRITE(adc_base->CC, ADC_ClockSource_Either, 0, 4);
     
     /* Configure Sampling Rate of the ADC Module */
-    RegWrite_Bits(&adc_base->PC, ADC_SampleRate_125ksps, 0, 4);
+    REG_WRITE(adc_base->PC, ADC_SampleRate_125ksps, 0, 4);
 
     /* Enable Dither */
-    RegWrite_Bits(&adc_base->CTL, ADC_Dither_Enable, 6, 1);
+    REG_WRITE(adc_base->CTL, ADC_Dither_Enable, 6, 1);
 
     /* Set Hardware Averaging */
-    RegWrite_Bits(&adc_base->SAC, ADC_HWAveraging_Disabled, 0, 4);
+    REG_WRITE(adc_base->SAC, ADC_HWAveraging_Disabled, 0, 4);
 
     /* Configure Sample Sequencer Priorities */
-    RegWrite_Bits(&adc_base->SSPRI, ADC_SSPriority_0, 0, 2);
+    REG_WRITE(adc_base->SSPRI, ADC_SSPriority_0, 0, 2);
 
     /* Disable Sample Sequencer */
-    RegWrite_Bits(&adc_base->ACTSS, 0, 0, 1);
+    REG_WRITE(adc_base->ACTSS, 0, 0, 1);
 
     /* Configure Trigger Event for SS0 as Processor */
-    RegWrite_Bits(&adc_base->EMUX, ADC_TriggerSelect_Always, 0, 4);
+    REG_WRITE(adc_base->EMUX, ADC_TriggerSelect_Always, 0, 4);
 
     /* Configure the No. of Samples to be 8 */
-    RegWrite_Bits(&adc_base->SSCTL0, 1, 29, 1);
+    REG_WRITE(adc_base->SSCTL0, 1, 29, 1);
 
     /* Enable Interrupt for Samples of SS0 */
-    RegWrite_Bits(&adc_base->SSCTL0, 1, 14, 1); // 4th Sample 
-    RegWrite_Bits(&adc_base->SSCTL0, 1, 30, 1); // 8th Sample    
+    REG_WRITE(adc_base->SSCTL0, 1, 14, 1); // 4th Sample 
+    REG_WRITE(adc_base->SSCTL0, 1, 30, 1); // 8th Sample    
 
     /* Configure Trigger Source pin for SS0 samples */
-    RegWrite_Bits(&adc_base->SSMUX0, ADC_SampleInput_AIN5, 0, 4); // 1st Sample
-    RegWrite_Bits(&adc_base->SSMUX0, ADC_SampleInput_AIN5, 4, 4); // 2nd Sample
-    RegWrite_Bits(&adc_base->SSMUX0, ADC_SampleInput_AIN5, 8, 4); // 3rd Sample
-    RegWrite_Bits(&adc_base->SSMUX0, ADC_SampleInput_AIN5, 12, 4); // 4th Sample
-    RegWrite_Bits(&adc_base->SSMUX0, ADC_SampleInput_AIN5, 16, 4); // 5th Sample
-    RegWrite_Bits(&adc_base->SSMUX0, ADC_SampleInput_AIN5, 20, 4); // 6th Sample
-    RegWrite_Bits(&adc_base->SSMUX0, ADC_SampleInput_AIN5, 24, 4); // 7th Sample
-    RegWrite_Bits(&adc_base->SSMUX0, ADC_SampleInput_AIN5, 28, 4); // 8th Sample
+    REG_WRITE(adc_base->SSMUX0, ADC_SampleInput_AIN5, 0, 4); // 1st Sample
+    REG_WRITE(adc_base->SSMUX0, ADC_SampleInput_AIN5, 4, 4); // 2nd Sample
+    REG_WRITE(adc_base->SSMUX0, ADC_SampleInput_AIN5, 8, 4); // 3rd Sample
+    REG_WRITE(adc_base->SSMUX0, ADC_SampleInput_AIN5, 12, 4); // 4th Sample
+    REG_WRITE(adc_base->SSMUX0, ADC_SampleInput_AIN5, 16, 4); // 5th Sample
+    REG_WRITE(adc_base->SSMUX0, ADC_SampleInput_AIN5, 20, 4); // 6th Sample
+    REG_WRITE(adc_base->SSMUX0, ADC_SampleInput_AIN5, 24, 4); // 7th Sample
+    REG_WRITE(adc_base->SSMUX0, ADC_SampleInput_AIN5, 28, 4); // 8th Sample
 
     /* Disable ADC Interrupt Mask as DMA will generate Interrupt of this ADC peripheral */
-    RegWrite_Bits(&adc_base->IM, 0, 0, 1);
+    REG_WRITE(adc_base->IM, 0, 0, 1);
 }
 
 /**
@@ -151,7 +151,7 @@ uint16_t ADC_ReadRaw(ADC_Module_e mod)
     ADC0_Type *adc_base = ADC_getBase(mod);
 
     /* Trigger SS0 in ADC module */
-    RegWrite_Bits(&adc_base->PSSI, 1, 0, 1);
+    REG_WRITE(adc_base->PSSI, 1, 0, 1);
 
     /* Read the Status of Busy Bit */
     while(RegRead_Bits(&adc_base->SSFSTAT0, 8, 1))
@@ -176,7 +176,7 @@ void ADC_TriggerConversion(ADC_Module_e mod)
     ADC0_Type *adc_base = ADC_getBase(mod);
 
     /* Trigger SS0 in ADC module */
-    RegWrite_Bits(&adc_base->PSSI, 1, 0, 1);   
+    REG_WRITE(adc_base->PSSI, 1, 0, 1);   
 }
 
 /**

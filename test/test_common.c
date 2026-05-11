@@ -42,7 +42,7 @@ void test_common_RegWrite_Bits_0(void)
 
     for(int iter = 0; iter < 1; iter++)
     {
-        RegWrite_Bits(&regVal, 0, 0, 32);
+        REG_WRITE(regVal, 0, 0, 32);
     }
 
     QueryPerformanceCounter(&end);   
@@ -59,7 +59,7 @@ void test_common_RegWrite_Bits_0(void)
 void test_common_RegWrite_Bits_1(void)
 { 
     uint32_t regVal = 0x5A5A5A5A;
-    RegWrite_Bits(&regVal, 0, 0, 32);
+    REG_WRITE(regVal, 0, 0, 32);
     TEST_ASSERT_EQUAL_UINT32(0x0000000, regVal);
 }
 

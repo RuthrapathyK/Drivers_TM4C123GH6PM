@@ -19,6 +19,8 @@ uint16_t adc_val[MAX_ADC_SAMPLE_SIZE] = {0};
 volatile bool isTransferDone = false;
 extern volatile uint32_t SampleCount;
 
+uint32_t volatile val = 0;
+uint32_t read = 0;
 /**
  * @brief Initializes the board pins for UART communication.
  *
@@ -111,6 +113,28 @@ int main()
   /* Init Interrupts */
   Interrupt_Init();
 
+  REG_WRITE(val, 3, 1, 2);
+  read = REG_READ(val, 1,2);
+
+  REG_WRITE(val, 6, 0, 32);
+  read = REG_READ(val, 0,15);
+
+  REG_WRITE(val, 1, 31, 1);
+  read = REG_READ(val, 0,32);
+
+  REG_WRITE(val, 1, 0, 1);
+  read = REG_READ(val, 0,32);
+  
+  REG_WRITE(val, 0, 0, 32);
+
+  SRAM_SET_BIT(val, 10);
+  SRAM_SET_BIT(val, 0);
+  SRAM_SET_BIT(val, 31);
+
+  SRAM_CLEAR_BIT(val, 10);
+  SRAM_CLEAR_BIT(val, 0);
+  SRAM_CLEAR_BIT(val, 31);
+
   while(1)
   {
     GPIO_setPin(PF1);
@@ -126,7 +150,7 @@ int main()
     DMA_EnableTransfer(DMA_0);
 
     /* Enable SS0 Sample Sequencer to start Continuos Conversion */
-    REG_SET_BIT(&ADC0->ACTSS, 0);
+    REG_SET_BIT(ADC0->ACTSS, 0);
     
     /* Wait till Configured No of Conversions are completed */
     while(!isTransferDone)

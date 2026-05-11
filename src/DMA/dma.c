@@ -50,11 +50,11 @@ void DMA_Init(DMA_Module_e mod)
     ASSERT(mod < DMA_Max);
 
     /* Reset DMA controller */
-    RegWrite_Bits(&SYSCTL->SRDMA, 1, mod, 1);
-    RegWrite_Bits(&SYSCTL->SRDMA, 0, mod, 1);
+    RegWrite_Bits_ASSERT(&SYSCTL->SRDMA, 1, mod, 1);
+    RegWrite_Bits_ASSERT(&SYSCTL->SRDMA, 0, mod, 1);
 
     /* Enable Clock for DMA controller */
-    RegWrite_Bits(&SYSCTL->RCGCDMA, 1, mod, 1);
+    RegWrite_Bits_ASSERT(&SYSCTL->RCGCDMA, 1, mod, 1);
 
     /* Wait till DMA controller is Enabled */
     while(!RegRead_Bits(&SYSCTL->PRDMA, mod, 1))
@@ -64,28 +64,28 @@ void DMA_Init(DMA_Module_e mod)
     UDMA_Type *dma_base = DMA_getBase(DMA_0);
 
     /* Enable DMA controller */
-    RegWrite_Bits(&dma_base->CFG, 1, 0, 1);
+    REG_WRITE(dma_base->CFG, 1, 0, 1);
     
     /* Configure Base Address of Channel Control Table */
-    RegWrite_Bits(&dma_base->CTLBASE, ((uint32_t)&Channel_Control_Table) >> 10, 10, 22);
+    RegWrite_Bits_ASSERT(&dma_base->CTLBASE, ((uint32_t)&Channel_Control_Table) >> 10, 10, 22);
 
     /* Disable the Channel(i.e Channel 14) to Start the Transfer */
-    RegWrite_Bits(&dma_base->ENACLR, 1, 14, 1);
+    REG_WRITE(dma_base->ENACLR, 1, 14, 1);
 
     /* Configure the Channel Mapping for ADC0 SS0 (i.e. Channel 14)*/
-    RegWrite_Bits(&dma_base->CHMAP1, DMA_CH14_ENC0_ADC0SS0, 24, 4);
+    REG_WRITE(dma_base->CHMAP1, DMA_CH14_ENC0_ADC0SS0, 24, 4);
 
     /* Configure the Channel Priority(i.e. Channel 14) to High */
-    RegWrite_Bits(&dma_base->PRIOSET, DMA_ChannelPriority_High, 14, 1);
+    REG_WRITE(dma_base->PRIOSET, DMA_ChannelPriority_High, 14, 1);
 
     /* Configue Channel (i.e. Channel 14) to accept only Burst transfer request */
-    RegWrite_Bits(&dma_base->USEBURSTSET, 1, 14, 1);
+    REG_WRITE(dma_base->USEBURSTSET, 1, 14, 1);
 
     /* Configure Channel(i.e. Channel 14) to use Primary Control Structure */
-    //RegWrite_Bits(&dma_base->ALTCLR, 1, 14, 1);
+    //REG_WRITE(dma_base->ALTCLR, 1, 14, 1);
 
     /* Enable ADC0 SS0 request in Channel Mask */
-    RegWrite_Bits(&dma_base->REQMASKCLR, 1, 14, 1);
+    REG_WRITE(dma_base->REQMASKCLR, 1, 14, 1);
 }
 
 void DMA_EnableTransfer(DMA_Module_e mod)
@@ -110,5 +110,5 @@ void DMA_EnableTransfer(DMA_Module_e mod)
     DMA_ChannelConfig(DMA_ChannelControl_Secondary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[2048 - 1], ControlWord);
 
     /* Enable the Channel(i.e Channel 14) to Start the Transfer */
-    RegWrite_Bits(&dma_base->ENASET, 1, 14, 1);
+    REG_WRITE(dma_base->ENASET, 1, 14, 1);
 }
