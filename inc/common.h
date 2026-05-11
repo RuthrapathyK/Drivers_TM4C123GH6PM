@@ -7,6 +7,7 @@
 #include "arm_cortex_m4f.h"
 #include "TM4C123GH6PM.h"
 
+/************************************** RTOS ****************************************************** */
 #define ENABLED   1
 #define DISABLED  0
 
@@ -19,8 +20,10 @@
 
 #define __INLINE__ inline __attribute__((always_inline))
 
+/************************************** System Clock ******************************************** */
 #define SYSTEM_CLOCK_FREQ 16000000
 
+/********************************* Assertions **************************************** */
 #ifdef CEEDLING_TEST
   #include "unity.h"
   extern bool isAsserted;
@@ -39,6 +42,21 @@
     }\
   }
 #endif
+
+/************************************** Bit Banding ***********************************************/
+#define SRAM_BASE    0x20000000
+#define SRAM_BB_BASE 0x22000000
+
+#define PERIPH_BASE 0x40000000
+#define PERIPH_BB_BASE 0x42000000
+
+#define SRAM_OFFSET(SRAM_ADDR) (SRAM_ADDR - SRAM_BASE)
+#define SRAM_BB_SETBIT(SRAM_ADDR, SRAM_BIT) (*((volatile uint32_t *)((SRAM_BB_BASE) + (SRAM_OFFSET((uint32_t)SRAM_ADDR) * 32u) + (SRAM_BIT * 4u))) = 1)
+#define SRAM_BB_CLEARBIT(SRAM_ADDR, SRAM_BIT) (*((volatile uint32_t *)((SRAM_BB_BASE) + (SRAM_OFFSET((uint32_t)SRAM_ADDR) * 32u) + (SRAM_BIT * 4u))) = 0)
+
+#define PERIPH_OFFSET(PERIPH_ADDR) (PERIPH_ADDR - PERIPH_BASE)
+#define REG_SET_BIT(PERIPH_ADDR, PERIPH_BIT) (*((volatile uint32_t *)((PERIPH_BB_BASE) + (PERIPH_OFFSET((uint32_t)PERIPH_ADDR) * 32u) + (PERIPH_BIT * 4u))) = 1)
+#define REG_CLEAR_BIT(PERIPH_ADDR, PERIPH_BIT) (*((volatile uint32_t *)((PERIPH_BB_BASE) + (PERIPH_OFFSET((uint32_t)PERIPH_ADDR) * 32u) + (PERIPH_BIT * 4u))) = 0)
 
 /**
  * @brief Writes bits at a specified position in a register.

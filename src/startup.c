@@ -12,7 +12,7 @@
  */
 __attribute__ ((weak)) void Reserved(void)
 {
-    while (1);
+    ASSERT(0);
 }
 
 /**
@@ -21,7 +21,7 @@ __attribute__ ((weak)) void Reserved(void)
  */
 void NMI_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 /**
  * @brief Upon the exception occurrence the Processor will be in infinite loop. This will avoid unintended execution from memory
@@ -29,7 +29,7 @@ void NMI_handler(void)
  */
 void HardFault_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 /**
  * @brief Upon the exception occurrence the Processor will be in infinite loop. This will avoid unintended execution from memory
@@ -37,7 +37,7 @@ void HardFault_handler(void)
  */
 void MemManage_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 /**
  * @brief Upon the exception occurrence the Processor will be in infinite loop. This will avoid unintended execution from memory
@@ -45,7 +45,7 @@ void MemManage_handler(void)
  */
 void BusFault_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 /**
  * @brief Upon the exception occurrence the Processor will be in infinite loop. This will avoid unintended execution from memory
@@ -53,7 +53,7 @@ void BusFault_handler(void)
  */
 void UsageFault_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 /**
  * @brief If the Application doesnt redefine the Handler and Enables Interrupt
@@ -62,7 +62,7 @@ void UsageFault_handler(void)
  */
 __attribute__ ((weak)) void SVCall_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -72,7 +72,7 @@ __attribute__ ((weak)) void SVCall_handler(void)
  */
 __attribute__ ((weak)) void DebugMonitor_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -82,7 +82,7 @@ __attribute__ ((weak)) void DebugMonitor_handler(void)
  */
 __attribute__ ((weak)) void PendSV_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -92,7 +92,7 @@ __attribute__ ((weak)) void PendSV_handler(void)
  */
 __attribute__ ((weak)) void SysTick_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -102,7 +102,7 @@ __attribute__ ((weak)) void SysTick_handler(void)
  */
 __attribute__ ((weak)) void GPIO_Port_A_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -112,7 +112,7 @@ __attribute__ ((weak)) void GPIO_Port_A_handler(void)
  */
 __attribute__ ((weak)) void GPIO_Port_B_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -122,7 +122,7 @@ __attribute__ ((weak)) void GPIO_Port_B_handler(void)
  */
 __attribute__ ((weak)) void GPIO_Port_C_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -132,7 +132,7 @@ __attribute__ ((weak)) void GPIO_Port_C_handler(void)
  */
 __attribute__ ((weak)) void GPIO_Port_D_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -142,7 +142,7 @@ __attribute__ ((weak)) void GPIO_Port_D_handler(void)
  */
 __attribute__ ((weak)) void GPIO_Port_E_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -152,7 +152,7 @@ __attribute__ ((weak)) void GPIO_Port_E_handler(void)
  */
 __attribute__ ((weak)) void UART0_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -162,7 +162,7 @@ __attribute__ ((weak)) void UART0_handler(void)
  */
 __attribute__ ((weak)) void UART1_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -172,7 +172,7 @@ __attribute__ ((weak)) void UART1_handler(void)
  */
 __attribute__ ((weak)) void SSI0_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -182,7 +182,7 @@ __attribute__ ((weak)) void SSI0_handler(void)
  */
 __attribute__ ((weak)) void I2C0_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -192,7 +192,7 @@ __attribute__ ((weak)) void I2C0_handler(void)
  */
 __attribute__ ((weak)) void PWM0_Fault_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -202,7 +202,7 @@ __attribute__ ((weak)) void PWM0_Fault_handler(void)
  */
 __attribute__ ((weak)) void PWM0_Generator_0_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -212,7 +212,7 @@ __attribute__ ((weak)) void PWM0_Generator_0_handler(void)
  */
 __attribute__ ((weak)) void PWM0_Generator_1_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -222,7 +222,7 @@ __attribute__ ((weak)) void PWM0_Generator_1_handler(void)
  */
 __attribute__ ((weak)) void PWM0_Generator_2_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -232,7 +232,7 @@ __attribute__ ((weak)) void PWM0_Generator_2_handler(void)
  */
 __attribute__ ((weak)) void QEI0_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -242,7 +242,7 @@ __attribute__ ((weak)) void QEI0_handler(void)
  */
 __attribute__ ((weak)) void ADC0_Sequence_0_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -252,7 +252,7 @@ __attribute__ ((weak)) void ADC0_Sequence_0_handler(void)
  */
 __attribute__ ((weak)) void ADC0_Sequence_1_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -262,7 +262,7 @@ __attribute__ ((weak)) void ADC0_Sequence_1_handler(void)
  */
 __attribute__ ((weak)) void ADC0_Sequence_2_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -272,7 +272,7 @@ __attribute__ ((weak)) void ADC0_Sequence_2_handler(void)
  */
 __attribute__ ((weak)) void ADC0_Sequence_3_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -282,7 +282,7 @@ __attribute__ ((weak)) void ADC0_Sequence_3_handler(void)
  */
 __attribute__ ((weak)) void Watchdog_Timers_0_1_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -292,7 +292,7 @@ __attribute__ ((weak)) void Watchdog_Timers_0_1_handler(void)
  */
 __attribute__ ((weak)) void Timer_0A_16_32_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -302,7 +302,7 @@ __attribute__ ((weak)) void Timer_0A_16_32_handler(void)
  */
 __attribute__ ((weak)) void Timer_0B_16_32_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -312,7 +312,7 @@ __attribute__ ((weak)) void Timer_0B_16_32_handler(void)
  */
 __attribute__ ((weak)) void Timer_1A_16_32_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -322,7 +322,7 @@ __attribute__ ((weak)) void Timer_1A_16_32_handler(void)
  */
 __attribute__ ((weak)) void Timer_1B_16_32_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -332,7 +332,7 @@ __attribute__ ((weak)) void Timer_1B_16_32_handler(void)
  */
 __attribute__ ((weak)) void Timer_2A_16_32_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -342,7 +342,7 @@ __attribute__ ((weak)) void Timer_2A_16_32_handler(void)
  */
 __attribute__ ((weak)) void Timer_2B_16_32_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -352,7 +352,7 @@ __attribute__ ((weak)) void Timer_2B_16_32_handler(void)
  */
 __attribute__ ((weak)) void Analog_Comparator_0_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -362,7 +362,7 @@ __attribute__ ((weak)) void Analog_Comparator_0_handler(void)
  */
 __attribute__ ((weak)) void Analog_Comparator_1_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -372,7 +372,7 @@ __attribute__ ((weak)) void Analog_Comparator_1_handler(void)
  */
 __attribute__ ((weak)) void System_Control_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -382,7 +382,7 @@ __attribute__ ((weak)) void System_Control_handler(void)
  */
 __attribute__ ((weak)) void Flash_and_EEPROM_Control_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -392,7 +392,7 @@ __attribute__ ((weak)) void Flash_and_EEPROM_Control_handler(void)
  */
 __attribute__ ((weak)) void GPIO_Port_F_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -402,7 +402,7 @@ __attribute__ ((weak)) void GPIO_Port_F_handler(void)
  */
 __attribute__ ((weak)) void UART2_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -412,7 +412,7 @@ __attribute__ ((weak)) void UART2_handler(void)
  */
 __attribute__ ((weak)) void SSI1_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -422,7 +422,7 @@ __attribute__ ((weak)) void SSI1_handler(void)
  */
 __attribute__ ((weak)) void Timer_3A_16_32_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -432,7 +432,7 @@ __attribute__ ((weak)) void Timer_3A_16_32_handler(void)
  */
 __attribute__ ((weak)) void Timer_3B_16_32_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -442,7 +442,7 @@ __attribute__ ((weak)) void Timer_3B_16_32_handler(void)
  */
 __attribute__ ((weak)) void I2C1_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -452,7 +452,7 @@ __attribute__ ((weak)) void I2C1_handler(void)
  */
 __attribute__ ((weak)) void QEI1_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -462,7 +462,7 @@ __attribute__ ((weak)) void QEI1_handler(void)
  */
 __attribute__ ((weak)) void CAN0_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -472,7 +472,7 @@ __attribute__ ((weak)) void CAN0_handler(void)
  */
 __attribute__ ((weak)) void CAN1_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -482,7 +482,7 @@ __attribute__ ((weak)) void CAN1_handler(void)
  */
 __attribute__ ((weak)) void Hibernation_Module_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -492,7 +492,7 @@ __attribute__ ((weak)) void Hibernation_Module_handler(void)
  */
 __attribute__ ((weak)) void USB_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -502,7 +502,7 @@ __attribute__ ((weak)) void USB_handler(void)
  */
 __attribute__ ((weak)) void PWM_Generator_3_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -512,7 +512,7 @@ __attribute__ ((weak)) void PWM_Generator_3_handler(void)
  */
 __attribute__ ((weak)) void uDMA_Software_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -522,7 +522,7 @@ __attribute__ ((weak)) void uDMA_Software_handler(void)
  */
 __attribute__ ((weak)) void uDMA_Error_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -532,7 +532,7 @@ __attribute__ ((weak)) void uDMA_Error_handler(void)
  */
 __attribute__ ((weak)) void ADC1_Sequence_0_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -542,7 +542,7 @@ __attribute__ ((weak)) void ADC1_Sequence_0_handler(void)
  */
 __attribute__ ((weak)) void ADC1_Sequence_1_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -552,7 +552,7 @@ __attribute__ ((weak)) void ADC1_Sequence_1_handler(void)
  */
 __attribute__ ((weak)) void ADC1_Sequence_2_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -562,7 +562,7 @@ __attribute__ ((weak)) void ADC1_Sequence_2_handler(void)
  */
 __attribute__ ((weak)) void ADC1_Sequence_3_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -572,7 +572,7 @@ __attribute__ ((weak)) void ADC1_Sequence_3_handler(void)
  */
 __attribute__ ((weak)) void SSI2_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -582,7 +582,7 @@ __attribute__ ((weak)) void SSI2_handler(void)
  */
 __attribute__ ((weak)) void SSI3_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -592,7 +592,7 @@ __attribute__ ((weak)) void SSI3_handler(void)
  */
 __attribute__ ((weak)) void UART3_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -602,7 +602,7 @@ __attribute__ ((weak)) void UART3_handler(void)
  */
 __attribute__ ((weak)) void UART4_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -612,7 +612,7 @@ __attribute__ ((weak)) void UART4_handler(void)
  */
 __attribute__ ((weak)) void UART5_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -622,7 +622,7 @@ __attribute__ ((weak)) void UART5_handler(void)
  */
 __attribute__ ((weak)) void UART6_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -632,7 +632,7 @@ __attribute__ ((weak)) void UART6_handler(void)
  */
 __attribute__ ((weak)) void UART7_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 /**
  * @brief If the Application doesnt redefine the Handler and Enables Interrupt
@@ -641,7 +641,7 @@ __attribute__ ((weak)) void UART7_handler(void)
  */
 __attribute__ ((weak)) void I2C2_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -651,7 +651,7 @@ __attribute__ ((weak)) void I2C2_handler(void)
  */
 __attribute__ ((weak)) void I2C3_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -661,7 +661,7 @@ __attribute__ ((weak)) void I2C3_handler(void)
  */
 __attribute__ ((weak)) void Timer_4A_16_32_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -671,7 +671,7 @@ __attribute__ ((weak)) void Timer_4A_16_32_handler(void)
  */
 __attribute__ ((weak)) void Timer_4B_16_32_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -681,7 +681,7 @@ __attribute__ ((weak)) void Timer_4B_16_32_handler(void)
  */
 __attribute__ ((weak)) void Timer_5A_16_32_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -691,7 +691,7 @@ __attribute__ ((weak)) void Timer_5A_16_32_handler(void)
  */
 __attribute__ ((weak)) void Timer_5B_16_32_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -701,7 +701,7 @@ __attribute__ ((weak)) void Timer_5B_16_32_handler(void)
  */
 __attribute__ ((weak)) void Timer_0A_32_64_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -711,7 +711,7 @@ __attribute__ ((weak)) void Timer_0A_32_64_handler(void)
  */
 __attribute__ ((weak)) void Timer_0B_32_64_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -721,7 +721,7 @@ __attribute__ ((weak)) void Timer_0B_32_64_handler(void)
  */
 __attribute__ ((weak)) void Timer_1A_32_64_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -731,7 +731,7 @@ __attribute__ ((weak)) void Timer_1A_32_64_handler(void)
  */
 __attribute__ ((weak)) void Timer_1B_32_64_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -741,7 +741,7 @@ __attribute__ ((weak)) void Timer_1B_32_64_handler(void)
  */
 __attribute__ ((weak)) void Timer_2A_32_64_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -751,7 +751,7 @@ __attribute__ ((weak)) void Timer_2A_32_64_handler(void)
  */
 __attribute__ ((weak)) void Timer_2B_32_64_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -761,7 +761,7 @@ __attribute__ ((weak)) void Timer_2B_32_64_handler(void)
  */
 __attribute__ ((weak)) void Timer_3A_32_64_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -771,7 +771,7 @@ __attribute__ ((weak)) void Timer_3A_32_64_handler(void)
  */
 __attribute__ ((weak)) void Timer_3B_32_64_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -781,7 +781,7 @@ __attribute__ ((weak)) void Timer_3B_32_64_handler(void)
  */
 __attribute__ ((weak)) void Timer_4A_32_64_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -791,7 +791,7 @@ __attribute__ ((weak)) void Timer_4A_32_64_handler(void)
  */
 __attribute__ ((weak)) void Timer_4B_32_64_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -801,7 +801,7 @@ __attribute__ ((weak)) void Timer_4B_32_64_handler(void)
  */
 __attribute__ ((weak)) void Timer_5A_32_64_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -811,7 +811,7 @@ __attribute__ ((weak)) void Timer_5A_32_64_handler(void)
  */
 __attribute__ ((weak)) void Timer_5B_32_64_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -821,7 +821,7 @@ __attribute__ ((weak)) void Timer_5B_32_64_handler(void)
  */
 __attribute__ ((weak)) void System_Exception_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -831,7 +831,7 @@ __attribute__ ((weak)) void System_Exception_handler(void)
  */
 __attribute__ ((weak)) void PWM1_Generator_0_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -841,7 +841,7 @@ __attribute__ ((weak)) void PWM1_Generator_0_handler(void)
  */
 __attribute__ ((weak)) void PWM1_Generator_1_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -851,7 +851,7 @@ __attribute__ ((weak)) void PWM1_Generator_1_handler(void)
  */
 __attribute__ ((weak)) void PWM1_Generator_2_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -861,7 +861,7 @@ __attribute__ ((weak)) void PWM1_Generator_2_handler(void)
  */
 __attribute__ ((weak)) void PWM1_Generator_3_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 /**
@@ -871,7 +871,7 @@ __attribute__ ((weak)) void PWM1_Generator_3_handler(void)
  */
 __attribute__ ((weak)) void PWM1_Fault_handler(void)
 {
-    while(1);
+    ASSERT(0);
 }
 
 void Reset_handler(void);

@@ -25,7 +25,7 @@ extern volatile uint32_t SampleCount;
  * Configures GPIO pins PA0 and PA1 as UART0 RX and TX pins respectively
  * by setting up the pin multiplexing for serial communication.
  */
-void BoardPins_Init(void)
+void Pins_Init(void)
 {
   /* Configure UART Pins */
   Pin_Config(Port_PA, 0, PA0_U0RX);
@@ -42,7 +42,7 @@ void BoardPins_Init(void)
  * Must be called during system initialization to set up core communication and
  * data acquisition interfaces.
  */
-void BoardPeripheral_Init(void)
+void Peripheral_Init(void)
 {
   /* Init UART */
   UART_getDefaultConfig(&UART0_Handler);
@@ -64,7 +64,7 @@ void BoardPeripheral_Init(void)
  * Creates and configures receive and transmit queues for UART0 communication.
  * These queues are used for non-blocking interrupt-driven UART data transfer.
  */
-void BoardServices_Init(void)
+void Services_Init(void)
 {
   /* Initialize the Queue for UART */
   Queue_Init(&UART_RX_QHandler, (uint8_t *)UART_RX_QBuffer, sizeof(UART_RX_QBuffer[0]), sizeof(UART_RX_QBuffer) / sizeof(UART_RX_QBuffer[0]));
@@ -78,7 +78,7 @@ void BoardServices_Init(void)
  * then re-enables global interrupts. Must be called after peripheral initialization
  * to enable interrupt-driven peripheral operation.
  */
-void BoardInterrupt_Init(void)
+void Interrupt_Init(void)
 {
   /* Disable Global Interrupt of the Processor */
   __disable_irq();
@@ -100,16 +100,16 @@ void BoardInterrupt_Init(void)
 int main()
 {
   /* Init Peripherals needed */
-  BoardPeripheral_Init();
+  Peripheral_Init();
 
   /* Init the Pin Configurations */
-  BoardPins_Init();
+  Pins_Init();
  
   /* Init other Services */
-  BoardServices_Init();
+  Services_Init();
 
   /* Init Interrupts */
-  BoardInterrupt_Init();
+  Interrupt_Init();
 
   while(1)
   {
@@ -126,7 +126,7 @@ int main()
     DMA_EnableTransfer(DMA_0);
 
     /* Enable SS0 Sample Sequencer to start Continuos Conversion */
-    ADC0->ACTSS = 1;
+    REG_SET_BIT(&ADC0->ACTSS, 0);
     
     /* Wait till Configured No of Conversions are completed */
     while(!isTransferDone)

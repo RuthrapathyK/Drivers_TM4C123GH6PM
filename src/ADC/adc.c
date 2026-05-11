@@ -48,15 +48,14 @@ static ADC0_Type* ADC_getBase(ADC_Module_e mod)
 void ADC0_Sequence_0_handler(void)
 {
     /* Clear Interrupt */
-    ADC0->ISC = 1; // Direct Register write is needed to achieve the Maximum Sampling Rate
-
+    REG_SET_BIT(&ADC0->ISC, 0); // Direct Register write is needed to achieve the Maximum Sampling Rate
+       
     SampleCount += 1024;
 
     if(SampleCount >= MAX_ADC_SAMPLE_SIZE)
     {
         /* Disable SS0 Sample Sequencer to stop Continuos Conversion */
-        ADC0->ACTSS = 0; // Direct Register write is needed to achieve the Maximum Sampling Rate 
-
+        REG_CLEAR_BIT(&ADC0->ACTSS, 0); // Direct Register write is needed to achieve the Maximum Sampling Rate 
         isTransferDone = true;
     }
     else if(SampleCount == 2048)
