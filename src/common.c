@@ -1,5 +1,6 @@
 
 #include "common.h"
+#include "../src/NVIC/nvic.h"
 
 /**
  * @brief Writes bits at a specified position in a register.
@@ -15,6 +16,9 @@
  */
 void RegWrite_Bits(volatile uint32_t * reg, uint32_t reg_val, uint8_t start_bit, uint8_t bit_length)
 {
+
+  __disable_irq();
+
     uint32_t temp = *reg;
 
     /* Clear the Bits to 0 */
@@ -25,6 +29,8 @@ void RegWrite_Bits(volatile uint32_t * reg, uint32_t reg_val, uint8_t start_bit,
 
     /* To avoid Unknown operation while clearing and writing new value, temp variable is used */
     *reg = temp;
+
+     __enable_irq();
 }
 
 /**
