@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+#define DMA_MAX_XFER_COUNT 1024
+
 /* Channel 0 Encodings */
 #define DMA_CH0_ENC0_USB0EP1RX  0
 #define DMA_CH0_ENC1_UART2RX    1

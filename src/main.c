@@ -17,7 +17,8 @@ UART_config_t UART0_Handler;
 
 uint16_t adc_val[MAX_ADC_SAMPLE_SIZE] = {0};
 volatile bool isTransferDone = false;
-extern volatile uint32_t SampleCount;
+
+extern uint32_t volatile ProcessedSample_Count;
 
 uint32_t test[3] = {0,};
 /**
@@ -111,9 +112,6 @@ int main()
 
   /* Init Interrupts */
   Interrupt_Init();
-
-  SRAM_SET_BIT(test, 1);
-  test[1] = SRAM_READ_BIT(test, 1);
   
   while(1)
   {
@@ -121,7 +119,7 @@ int main()
 
     /* Clear Counter */
     isTransferDone = false;
-    SampleCount = 0;
+    ProcessedSample_Count = 0;
 
     /* Flush the FIFO so that unread data will not cause Overflow */
     ADC_FlushFIFO(ADC_SampleSequencer_0);

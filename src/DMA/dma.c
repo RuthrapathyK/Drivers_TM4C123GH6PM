@@ -3,6 +3,7 @@
 
 __attribute__((aligned(1024))) DMA_ChannelControl_t Channel_Control_Table[DMA_ChannelControl_Max][DMA_Channel_Max] = {0};
 
+extern uint32_t volatile ProcessedSample_Count;
 extern uint16_t adc_val[MAX_ADC_SAMPLE_SIZE];
 DMA_ControlWord_t ControlWord;
 
@@ -101,13 +102,49 @@ void DMA_EnableTransfer(DMA_Module_e mod)
     ControlWord.DSTINC = DMA_ChannelControl_HalfWord;
     ControlWord.DSTSIZE = DMA_ChannelControl_HalfWord;
     ControlWord.ARBSIZE = DMA_ChannelControl_Arbitration_4;
-    ControlWord.XFERSIZE = 1024 - 1;
     ControlWord.NXTUSEBURST = 0;
     ControlWord.XFERMODE = DMA_ChannelControl_XFERMode_PingPong;
 
-    /* Configure Control Structure of the Channel(i.e. Channel 14) */
-    DMA_ChannelConfig(DMA_ChannelControl_Primary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[1024 - 1], ControlWord);
-    DMA_ChannelConfig(DMA_ChannelControl_Secondary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[2048 - 1], ControlWord);
+    if((MAX_ADC_SAMPLE_SIZE - ProcessedSample_Count) > DMA_MAX_XFER_COUNT)
+    {
+        /* LOAD PRIMARY CHANNEL CONTROL STRUCTURE */
+        ControlWord.XFERSIZE = DMA_MAX_XFER_COUNT - 1;
+
+        /* Configure Control Structure of the Channel(i.e. Channel 14) */
+        DMA_ChannelConfig(DMA_ChannelControl_Primary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[ProcessedSample_Count + ControlWord.XFERSIZE], ControlWord);
+        
+        ProcessedSample_Count += DMA_MAX_XFER_COUNT;
+
+        /* LOAD SECONDARY CHANNEL CONTROL STRUCTURE */
+        if((MAX_ADC_SAMPLE_SIZE - ProcessedSample_Count) > DMA_MAX_XFER_COUNT)
+        {
+            ControlWord.XFERSIZE = DMA_MAX_XFER_COUNT - 1;
+
+            /* Configure Control Structure of the Channel(i.e. Channel 14) */
+            DMA_ChannelConfig(DMA_ChannelControl_Secondary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[ProcessedSample_Count + ControlWord.XFERSIZE], ControlWord);
+            
+            ProcessedSample_Count += DMA_MAX_XFER_COUNT;            
+        }
+        else
+        {
+            ControlWord.XFERSIZE = MAX_ADC_SAMPLE_SIZE - ProcessedSample_Count - 1;
+
+            /* Configure Control Structure of the Channel(i.e. Channel 14) */
+            DMA_ChannelConfig(DMA_ChannelControl_Secondary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[ProcessedSample_Count + ControlWord.XFERSIZE], ControlWord);
+
+            ProcessedSample_Count += (ControlWord.XFERSIZE + 1);
+        }
+
+    }
+    else
+    {
+            ControlWord.XFERSIZE = MAX_ADC_SAMPLE_SIZE - ProcessedSample_Count - 1;
+            ControlWord.XFERMODE = DMA_ChannelControl_XFERMode_Basic;
+            /* Configure Control Structure of the Channel(i.e. Channel 14) */
+            DMA_ChannelConfig(DMA_ChannelControl_Primary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[ProcessedSample_Count + ControlWord.XFERSIZE], ControlWord);
+
+            ProcessedSample_Count += (ControlWord.XFERSIZE + 1);        
+    }
 
     /* Enable the Channel(i.e Channel 14) to Start the Transfer */
     REG_WRITE(dma_base->ENASET, 1, 14, 1);
