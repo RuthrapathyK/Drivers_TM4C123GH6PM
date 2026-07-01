@@ -92,6 +92,7 @@ void Interrupt_Init(void)
   /* Enable NVIC peripheral Interrupt */
   NVIC_enableInterrupt(UART_0_IRQ);
   NVIC_enableInterrupt(ADC_0_SEQ_0_IRQ);
+  NVIC_enableInterrupt(TIMER_0A_IRQ);
 
   /* Enable Global Interrupt of the Processor */
   __enable_irq();
@@ -119,16 +120,6 @@ int main()
   
   while(1)
   {
-    /* Wait Till Timer has elapsed */
-    while(!RegRead_Bits(&TIMER0->MIS, 0, 1))
-    ;
-
-    /* Clear Interrupt Status */
-    REG_WRITE(TIMER0->ICR, 1, 0, 1);
-
-    /* Send Debug String */
-    UART_sendString_NonBlocking(&UART_TX_QHandler, "Timer Elapsed\n");
-
     // GPIO_setPin(PF1);
 
     // /* Clear Counter */

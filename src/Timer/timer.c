@@ -1,4 +1,18 @@
 #include "timer.h"
+#include "../src/Queue/queue.h"
+#include "../src/UART/uart.h"
+
+extern Queue_t UART_RX_QHandler;
+extern Queue_t UART_TX_QHandler;
+
+void Timer_0A_16_32_handler(void)
+{
+    /* Clear Interrupt Status */
+    REG_WRITE(TIMER0->ICR, 1, 0, 1);
+
+    /* Send Debug String */
+    UART_sendString_NonBlocking(&UART_TX_QHandler, "Timer Elapsed\n");
+}
 
 void TIM_Init(void)
 {
