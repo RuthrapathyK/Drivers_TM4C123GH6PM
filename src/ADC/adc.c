@@ -108,7 +108,7 @@ void ADC_Init(ADC_Module_e mod)
     RegWrite_Bits_ASSERT(&SYSCTL->SRADC, 0, mod, 1);
 
     /* Enable Clock for ADC module */
-    RegWrite_Bits(&SYSCTL->RCGCADC, 1, mod, 1);
+    RegWrite_Bits_ASSERT(&SYSCTL->RCGCADC, 1, mod, 1);
 
     /* Wait till ADC module is Enabled */
     while(!RegRead_Bits(&SYSCTL->PRADC, mod, 1))

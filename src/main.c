@@ -6,6 +6,7 @@
 #include "../src/ADC/adc.h"
 #include "../src/GPIO/gpio.h"
 #include "../src/DMA/dma.h"
+#include "../src/Timer/timer.h"
 
 uint16_t UART_RX_QBuffer[20] = {0};
 uint8_t UART_TX_QBuffer[20] = {0};
@@ -55,6 +56,9 @@ void Peripheral_Init(void)
 
   /* Init DMA */
   DMA_Init(DMA_0);
+
+  /* Init Timer */
+  TIM_Init();
 
   /* Init Test Pin */
   GPIO_Init(PF1, GPIO_DigitalOutput, GPIO_State_OFF);
@@ -115,38 +119,48 @@ int main()
   
   while(1)
   {
-    GPIO_setPin(PF1);
-
-    /* Clear Counter */
-    isTransferDone = false;
-    ProcessedSample_Count = 0;
-
-    /* Flush the FIFO so that unread data will not cause Overflow */
-    ADC_FlushFIFO(ADC_SampleSequencer_0);
-
-    /* Enable DMA transfers */
-    DMA_EnableTransfer(DMA_0);
-
-    /* Enable SS0 Sample Sequencer to start Continuos Conversion */
-    REG_SET_BIT(ADC0->ACTSS, 0);
-    
-    /* Wait till Configured No of Conversions are completed */
-    while(!isTransferDone)
+    /* Wait Till Timer has elapsed */
+    while(!RegRead_Bits(&TIMER0->MIS, 0, 1))
     ;
 
-    /* Check any Underflow or Overflow has happened in the Sample collection */
-    ADC_SynchronizationCheck();
-    
-    GPIO_clearPin(PF1);
+    /* Clear Interrupt Status */
+    REG_WRITE(TIMER0->ICR, 1, 0, 1);
 
-    for(uint32_t iter = 0; iter < MAX_ADC_SAMPLE_SIZE; iter++)
-    {
-      UART_sendString_NonBlocking(&UART_TX_QHandler, "$$P-,");
-      UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc_val[iter]);
-      UART_sendString_NonBlocking(&UART_TX_QHandler,";");
-      adc_val[iter] = 0;
-    }
-    delayLoop(1000);
+    /* Send Debug String */
+    UART_sendString_NonBlocking(&UART_TX_QHandler, "Timer Elapsed\n");
+
+    // GPIO_setPin(PF1);
+
+    // /* Clear Counter */
+    // isTransferDone = false;
+    // ProcessedSample_Count = 0;
+
+    // /* Flush the FIFO so that unread data will not cause Overflow */
+    // ADC_FlushFIFO(ADC_SampleSequencer_0);
+
+    // /* Enable DMA transfers */
+    // DMA_EnableTransfer(DMA_0);
+
+    // /* Enable SS0 Sample Sequencer to start Continuos Conversion */
+    // REG_SET_BIT(ADC0->ACTSS, 0);
+    
+    // /* Wait till Configured No of Conversions are completed */
+    // while(!isTransferDone)
+    // ;
+
+    // /* Check any Underflow or Overflow has happened in the Sample collection */
+    // ADC_SynchronizationCheck();
+    
+    // GPIO_clearPin(PF1);
+
+    // for(uint32_t iter = 0; iter < MAX_ADC_SAMPLE_SIZE; iter++)
+    // {
+    //   UART_sendString_NonBlocking(&UART_TX_QHandler, "$$P-,");
+    //   UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc_val[iter]);
+    //   UART_sendString_NonBlocking(&UART_TX_QHandler,";");
+    //   adc_val[iter] = 0;
+    // }
+    // delayLoop(1000);
   }
 
   return 0;
