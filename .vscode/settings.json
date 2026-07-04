@@ -10,5 +10,5 @@
         "arm_cortex_m4f.h": "c",
         "common.h": "c"
     },
-    "cortex-debug.variableUseNaturalFormat": false
+    "cortex-debug.variableUseNaturalFormat": true
 }

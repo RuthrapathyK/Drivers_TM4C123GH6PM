@@ -1,17 +1,12 @@
 #include "timer.h"
-#include "../src/Queue/queue.h"
+#include "../src/GPIO/gpio.h"
 #include "../src/UART/uart.h"
-
-extern Queue_t UART_RX_QHandler;
-extern Queue_t UART_TX_QHandler;
+#include "../src/ADC/adc.h"
 
 void Timer_0A_16_32_handler(void)
 {
     /* Clear Interrupt Status */
     REG_WRITE(TIMER0->ICR, 1, 0, 1);
-
-    /* Send Debug String */
-    UART_sendString_NonBlocking(&UART_TX_QHandler, "Timer Elapsed\n");
 }
 
 void TIM_Init(void)
@@ -36,14 +31,17 @@ void TIM_Init(void)
     REG_WRITE(TIMER0->TAMR, 0, 4, 1); // Downcount mode
     
     /* Configure Prescalar */
-    REG_WRITE(TIMER0->TAPR, 250, 0, 8);
+    REG_WRITE(TIMER0->TAPR, 16, 0, 8);
 
     /* Load Start Value to start counting */
-    REG_WRITE(TIMER0->TAILR, 64000, 0, 32); // Load the value to generate 1 second Once interrupt
+    REG_WRITE(TIMER0->TAILR, 8, 0, 16); // Load the value to generate 10 us Once interrupt
 
     /* Configure Interrupt Mask */
-    REG_WRITE(TIMER0->IMR, 1, 0, 1); // Timeout Interrupt Mask
+    REG_WRITE(TIMER0->IMR, 0, 0, 1); // Timeout Interrupt Mask
+
+    /* Configure Timer to Trigger ADC conversion */
+    REG_WRITE(TIMER0->CTL, 1, 5, 1);
 
     /* Enable Timer Module - 0*/
-    REG_WRITE(TIMER0->CTL, 1, 0, 1);    
+    //REG_WRITE(TIMER0->CTL, 1, 0, 1);    
 }

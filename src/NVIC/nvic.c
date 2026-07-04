@@ -63,3 +63,36 @@ void NVIC_disableInterrupt(NVIC_Interrupt_e intr_num)
         NVIC->DIS0 |= (1 << intr_num);
     }
 }
+
+/**
+ * @brief Sets the priority of the given interrupt in the NVIC.
+ * 
+ * This function writes the specified priority value into the corresponding
+ * NVIC priority register byte for the interrupt number.
+ * 
+ * @param intr_num Interrupt number (see NVIC_Interrupt_e)
+ * @param prio Priority value to assign (see NVIC_Priority_e)
+ */
+void NVIC_SetPriority(NVIC_Interrupt_e intr_num, NVIC_Priority_e prio)
+{
+    uint8_t *reg_addr = (uint8_t *)&NVIC->PRI0;
+
+    reg_addr[intr_num] &= 0x1F; // Clear the already set priority bits
+    reg_addr[intr_num] |= prio << 5; // Set the new priority bits
+}
+
+/**
+ * @brief Gets the priority of the given interrupt in the NVIC.
+ * 
+ * This function reads the priority value from the corresponding NVIC priority
+ * register byte for the interrupt number.
+ * 
+ * @param intr_num Interrupt number (see NVIC_Interrupt_e)
+ * @return Priority value of the interrupt (see NVIC_Priority_e)
+ */
+NVIC_Priority_e NVIC_GetPriority(NVIC_Interrupt_e intr_num)
+{
+    volatile uint8_t *reg_addr = (uint8_t *)&NVIC->PRI0;
+    
+    return reg_addr[intr_num] >> 5;
+}

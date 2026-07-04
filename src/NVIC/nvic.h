@@ -102,6 +102,17 @@ typedef enum {
     NVIC_IRQ_MAX
 } NVIC_Interrupt_e;
 
+typedef enum{
+  NVIC_Priority_0 = 0,
+  NVIC_Priority_1,
+  NVIC_Priority_2,
+  NVIC_Priority_3,
+  NVIC_Priority_4,
+  NVIC_Priority_5,
+  NVIC_Priority_6,
+  NVIC_Priority_7
+}NVIC_Priority_e;
+
 /**
  * @brief Enables the given interrupt in the NVIC.
  * 
@@ -121,6 +132,28 @@ void NVIC_enableInterrupt(NVIC_Interrupt_e intr_num);
  * @param intr_num Interrupt number (see NVIC_Interrupt_e)
  */
 void NVIC_disableInterrupt(NVIC_Interrupt_e intr_num);
+
+/**
+ * @brief Sets the priority of the given interrupt in the NVIC.
+ * 
+ * This function writes the specified priority value into the corresponding
+ * NVIC priority register byte for the interrupt number.
+ * 
+ * @param intr_num Interrupt number (see NVIC_Interrupt_e)
+ * @param prio Priority value to assign (see NVIC_Priority_e)
+ */
+void NVIC_SetPriority(NVIC_Interrupt_e intr_num, NVIC_Priority_e prio);
+
+/**
+ * @brief Gets the priority of the given interrupt in the NVIC.
+ * 
+ * This function reads the priority value from the corresponding NVIC priority
+ * register byte for the interrupt number.
+ * 
+ * @param intr_num Interrupt number (see NVIC_Interrupt_e)
+ * @return Priority value of the interrupt (see NVIC_Priority_e)
+ */
+NVIC_Priority_e NVIC_GetPriority(NVIC_Interrupt_e intr_num);
 
 /**
  * @brief Enables all interrupts globally.

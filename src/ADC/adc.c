@@ -1,5 +1,6 @@
 #include "adc.h"
 #include "../src/DMA/dma.h"
+#include "../src/UART/uart.h"
 
 extern uint16_t adc_val[MAX_ADC_SAMPLE_SIZE];
 extern volatile bool isTransferDone;
@@ -55,8 +56,8 @@ void ADC0_Sequence_0_handler(void)
     {
         if((Channel_Control_Table[DMA_ChannelControl_Primary][DMA_Channel_14].Control_Word.XFERSIZE == 0) && (Channel_Control_Table[DMA_ChannelControl_Secondary][DMA_Channel_14].Control_Word.XFERSIZE == 0))
         {
-            /* Disable SS0 Sample Sequencer to stop Continuos Conversion */
-            REG_CLEAR_BIT(ADC0->ACTSS, 0); // Direct Register write is needed to achieve the Maximum Sampling Rate 
+            /* Disable Timer to Stop the Conversion */
+            REG_CLEAR_BIT(TIMER0->CTL, 0); // Direct Register write is needed to achieve the Maximum Sampling Rate 
             isTransferDone = true;
         }
         else
@@ -121,7 +122,7 @@ void ADC_Init(ADC_Module_e mod)
     REG_WRITE(adc_base->CC, ADC_ClockSource_Either, 0, 4);
     
     /* Configure Sampling Rate of the ADC Module */
-    REG_WRITE(adc_base->PC, ADC_SampleRate_125ksps, 0, 4);
+    REG_WRITE(adc_base->PC, ADC_SampleRate_1000ksps, 0, 4);
 
     /* Enable Dither */
     REG_WRITE(adc_base->CTL, ADC_Dither_Enable, 6, 1);
@@ -135,8 +136,8 @@ void ADC_Init(ADC_Module_e mod)
     /* Disable Sample Sequencer */
     REG_WRITE(adc_base->ACTSS, 0, 0, 1);
 
-    /* Configure Trigger Event for SS0 as Processor */
-    REG_WRITE(adc_base->EMUX, ADC_TriggerSelect_Always, 0, 4);
+    /* Configure Trigger Event for SS0 as General Purpose Timer */
+    REG_WRITE(adc_base->EMUX, ADC_TriggerSelect_Timer, 0, 4);
 
     /* Configure the No. of Samples to be 8 */
     REG_WRITE(adc_base->SSCTL0, 1, 29, 1);
@@ -157,6 +158,9 @@ void ADC_Init(ADC_Module_e mod)
 
     /* Disable ADC Interrupt Mask as DMA will generate Interrupt of this ADC peripheral */
     REG_WRITE(adc_base->IM, 0, 0, 1);
+
+    /* Enable SS0 Sample Sequencer to Wait for Timer to Trigger the Conversion */
+    REG_WRITE(adc_base->ACTSS, 1, 0, 1);
 }
 
 /**
