@@ -56,8 +56,8 @@ void ADC0_Sequence_0_handler(void)
     {
         if((Channel_Control_Table[DMA_ChannelControl_Primary][DMA_Channel_14].Control_Word.XFERSIZE == 0) && (Channel_Control_Table[DMA_ChannelControl_Secondary][DMA_Channel_14].Control_Word.XFERSIZE == 0))
         {
-            /* Disable Timer to Stop the Conversion */
-            REG_CLEAR_BIT(TIMER0->CTL, 0); // Direct Register write is needed to achieve the Maximum Sampling Rate 
+            /* Disable PWM to Stop the Conversion */
+            REG_CLEAR_BIT(PWM0->_0_CTL, 0); // Direct Register write is needed to achieve the Maximum Sampling Rate 
             isTransferDone = true;
         }
         else
@@ -137,7 +137,7 @@ void ADC_Init(ADC_Module_e mod)
     REG_WRITE(adc_base->ACTSS, 0, 0, 1);
 
     /* Configure Trigger Event for SS0 as General Purpose Timer */
-    REG_WRITE(adc_base->EMUX, ADC_TriggerSelect_Timer, 0, 4);
+    REG_WRITE(adc_base->EMUX, ADC_TriggerSelect_PWM_0, 0, 4);
 
     /* Configure the No. of Samples to be 8 */
     REG_WRITE(adc_base->SSCTL0, 1, 29, 1);

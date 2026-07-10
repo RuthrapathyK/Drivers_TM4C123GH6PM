@@ -7,6 +7,7 @@
 #include "../src/GPIO/gpio.h"
 #include "../src/DMA/dma.h"
 #include "../src/Timer/timer.h"
+#include "../src/PWM/pwm.h"
 
 uint16_t UART_RX_QBuffer[20] = {0};
 uint8_t UART_TX_QBuffer[20] = {0};
@@ -36,6 +37,9 @@ void Pins_Init(void)
 
   /* Configure ADC Pins */
   Pin_Config(Port_PD, 2, PD2_ANALOG_AIN5);
+
+  /* Configure PWM Pins */
+  Pin_Config(Port_PB, 6, PB6_M0PWM0);
 }
 
 /**
@@ -58,7 +62,7 @@ void Peripheral_Init(void)
   DMA_Init(DMA_0);
 
   /* Init Timer */
-  TIM_Init();
+  //TIM_Init();
 
   /* Init Test Pin */
   GPIO_Init(PF1, GPIO_DigitalOutput, GPIO_State_OFF);
@@ -132,8 +136,8 @@ int main()
     /* Enable DMA transfers */
     DMA_EnableTransfer(DMA_0);
 
-    /* Enable Timer to Start the Conversion */
-    REG_SET_BIT(TIMER0->CTL, 0); 
+    /* Enable PWM to Start the Conversion - Counter will not restart on every trigger */
+    PWM_Init();
     
     /* Wait till Configured No of Conversions are completed */
     while(!isTransferDone)
