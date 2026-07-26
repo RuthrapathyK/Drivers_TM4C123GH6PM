@@ -1,6 +1,8 @@
 #ifndef __TYPES_H
 #define __TYPES_H
 
+#define INT64_MAX   ((int64_t)922337203685477580)
+
 typedef unsigned long long int uint64_t;
 typedef unsigned int  uint32_t;
 typedef unsigned short uint16_t;
