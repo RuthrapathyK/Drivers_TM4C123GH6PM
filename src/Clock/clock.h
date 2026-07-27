@@ -118,6 +118,5 @@ struct Node{
 };
 
 void Clock_Init(ClockSource_e clk_src, uint32_t expected_freq);
-uint32_t Clock_Get_SysClkFreq(void);
 
 #endif // CLOCK_H_INCLUDED
