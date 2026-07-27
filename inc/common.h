@@ -24,7 +24,7 @@
 #define __INLINE__ inline __attribute__((always_inline))
 
 /************************************** System Clock ******************************************** */
-#define SYSTEM_CLOCK_FREQ 50000000
+#define SYSTEM_CLOCK_FREQ 80000000
 
 /********************************* Assertions **************************************** */
 #ifdef CEEDLING_TEST

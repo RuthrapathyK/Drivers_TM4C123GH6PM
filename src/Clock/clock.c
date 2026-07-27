@@ -429,46 +429,24 @@ void Clock_Init(ClockSource_e clk_src, uint32_t expected_freq)
     /* Assert to check if the Expected Clock Frequency is found */
     ASSERT(retval == Clock_Found);
 
-    /* Configure the Clock Source */
-    REG_WRITE(SYSCTL->RCC, Precise_OSC, 4, 2);
+    /* Write the Registers */
+    RegWrite_Bits_ASSERT(&SYSCTL->RCC, Clock_Object.BestMatchReg.MOSCDIS, 0, 1); // Main Oscillator Enable/Disable
+    RegWrite_Bits_ASSERT(&SYSCTL->RCC, Clock_Object.BestMatchReg.XTAL, 6, 5); // Say the Clock freq is 16Mhz
+    RegWrite_Bits_ASSERT(&SYSCTL->RCC, Clock_Object.BestMatchReg.USESYSDIV, 22, 1); //Use SYSDIV as source of System Clock
+    RegWrite_Bits_ASSERT(&SYSCTL->RCC2, Clock_Object.BestMatchReg.OSCSRC2, 4, 3); // Select Clock Source
+    RegWrite_Bits_ASSERT(&SYSCTL->RCC2, Clock_Object.BestMatchReg.DIV400, 30, 1); // DIV400
+    RegWrite_Bits_ASSERT(&SYSCTL->RCC2, Clock_Object.BestMatchReg.USERCC2, 31, 1); // Use RCC2
+    RegWrite_Bits_ASSERT(&SYSCTL->RCC2, Clock_Object.BestMatchReg.SYSDIV2, 22, 7); // Select System Divisor. This has to be written only after DIV400 and Use RCC2 registers are set
+    RegWrite_Bits_ASSERT(&SYSCTL->RCC2, Clock_Object.BestMatchReg.PWRDN2, 13, 1); // Power Up the PLL
 
-    /* Configure the PLL */
-    REG_WRITE(SYSCTL->RCC, 1, 11, 1); // Disable PLL
-    REG_WRITE(SYSCTL->RCC, 1, 0, 1); // Disable Main Oscillator
-    REG_WRITE(SYSCTL->RCC, 0x15, 6, 5); // Say the Clock freq is 16Mhz
-    REG_WRITE(SYSCTL->RCC, 0, 13, 1); // Power Up the PLL
-    REG_WRITE(SYSCTL->RCC, 0x3, 23, 4); // Select System Divisor as 4 to generate 50Mhz
-    REG_WRITE(SYSCTL->RCC, 1, 22, 1); //Use SYSDIV as source of System Clock
-
-    /* Wait for PLL to Lock */
-    while(!RegRead_Bits(&SYSCTL->RIS, 6, 1))
-    ;
+    if(Clock_Object.BestMatchReg.BYPASS2 == SysClock_from_PLL)
+    {
+        /* Wait for PLL to Lock */
+        while(!RegRead_Bits(&SYSCTL->PLLSTAT, 0, 1))
+        ;
+    }
 
     /* Select the System Clock */
-    REG_WRITE(SYSCTL->RCC, 0, 11, 1); // Enable PLL
-
-    // /* Write the Registers */
-    // /* Bypass PLL to set the configuration */
-    // REG_WRITE(SYSCTL->RCC2, SysClock_from_OSCSource, 11, 1);
-    // REG_WRITE(SYSCTL->RCC, SysClock_Undivided, 22, 1);
-
-    // RegWrite_Bits_ASSERT(&SYSCTL->RCC, Clock_Object.BestMatchReg.USERCC2, 31, 1); // Use RCC2 register to Override
-    // RegWrite_Bits_ASSERT(&SYSCTL->RCC, Clock_Object.BestMatchReg.MOSCDIS, 0, 1); // Main Oscillator Enable/Disable
-    // RegWrite_Bits_ASSERT(&SYSCTL->RCC, Clock_Object.BestMatchReg.XTAL, 6, 5); // Choose the XTAL frequency of Main Oscillator
-
-    // RegWrite_Bits_ASSERT(&SYSCTL->RCC2, Clock_Object.BestMatchReg.OSCSRC2, 4, 3); // Select the Clock Source
-    // RegWrite_Bits_ASSERT(&SYSCTL->RCC2, Clock_Object.BestMatchReg.BYPASS2, 11, 1); // Select whether to use PLL or use from direct clock source
-    // RegWrite_Bits_ASSERT(&SYSCTL->RCC2, Clock_Object.BestMatchReg.PWRDN2, 13, 1); // PLL power configuration
-    // RegWrite_Bits_ASSERT(&SYSCTL->RCC2, Clock_Object.BestMatchReg.SYSDIV2, 22, 7); // System Divisor Value
-    // RegWrite_Bits_ASSERT(&SYSCTL->RCC, Clock_Object.BestMatchReg.USESYSDIV, 22, 1); // Check whether to use System Divisor
-    // RegWrite_Bits_ASSERT(&SYSCTL->RCC2, Clock_Object.BestMatchReg.DIV400, 30, 1); // Select whether to use SYSDIV2LSB
-
-    // delayLoop(1000);
-    // // /* Wait till PLL is locked */
-    // // while(!RegRead_Bits_ASSERT(&SYSCTL->RIS, 6, 1))
-    // // ;
-
-    // // /* Write to PLL to start the Timer */
-    // // REG_WRITE(SYSCTL->MISC, 1, 6, 1);
+    RegWrite_Bits_ASSERT(&SYSCTL->RCC2, Clock_Object.BestMatchReg.BYPASS2, 11, 1); // Disable PLL
 
 }
