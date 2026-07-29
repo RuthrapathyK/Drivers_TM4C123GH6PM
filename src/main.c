@@ -57,13 +57,13 @@ void Peripheral_Init(void)
   UART_Init(UART_0, &UART0_Handler);
 
   /* Init ADC */
-//  ADC_Init(ADC_0);
+ ADC_Init(ADC_0);
 
   /* Init DMA */
-//  DMA_Init(DMA_0);
+ DMA_Init(DMA_0);
 
   /* Init Timer */
-  //TIM_Init();
+  PWM_Init();
 
   /* Init Test Pin */
   GPIO_Init(PF1, GPIO_DigitalOutput, GPIO_State_OFF);
@@ -128,38 +128,40 @@ int main()
   
   while(1)
   {
-    UART_sendString("Hello World\n");
-    // GPIO_setPin(PF1);
+    GPIO_setPin(PF1);
 
-    // /* Clear Counter */
-    // isTransferDone = false;
-    // ProcessedSample_Count = 0;
+    /* Clear Counter */
+    isTransferDone = false;
+    ProcessedSample_Count = 0;
 
-    // /* Flush the FIFO so that unread data will not cause Overflow */
-    // ADC_FlushFIFO(ADC_SampleSequencer_0);
+    /* Flush the FIFO so that unread data will not cause Overflow */
+    ADC_FlushFIFO(ADC_SampleSequencer_0);
 
-    // /* Enable DMA transfers */
-    // DMA_EnableTransfer(DMA_0);
+    /* Enable DMA transfers */
+    DMA_EnableTransfer(DMA_0);
 
-    // /* Enable PWM to Start the Conversion - Counter will not restart on every trigger */
-    // PWM_Init();
+    /* Reset the PWM0 timer count */
+    REG_WRITE(PWM0->SYNC, 1, 0, 1);
+
+    /* Enable PWM to Start the Conversion - Counter will not restart on every trigger */
+    REG_SET_BIT(PWM0->_0_CTL, 0);
     
-    // /* Wait till Configured No of Conversions are completed */
-    // while(!isTransferDone)
-    // ;
+    /* Wait till Configured No of Conversions are completed */
+    while(!isTransferDone)
+    ;
 
-    // /* Check any Underflow or Overflow has happened in the Sample collection */
-    // ADC_SynchronizationCheck();
+    /* Check any Underflow or Overflow has happened in the Sample collection */
+    ADC_SynchronizationCheck();
     
-    // GPIO_clearPin(PF1);
+    GPIO_clearPin(PF1);
 
-    // for(uint32_t iter = 0; iter < MAX_ADC_SAMPLE_SIZE; iter++)
-    // {
-    //   UART_sendString_NonBlocking(&UART_TX_QHandler, "$$P-,");
-    //   UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc_val[iter]);
-    //   UART_sendString_NonBlocking(&UART_TX_QHandler,";");
-    //   adc_val[iter] = 0;
-    // }
+    for(uint32_t iter = 0; iter < MAX_ADC_SAMPLE_SIZE; iter++)
+    {
+      UART_sendString_NonBlocking(&UART_TX_QHandler, "$$P-,");
+      UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc_val[iter]);
+      UART_sendString_NonBlocking(&UART_TX_QHandler,";");
+      adc_val[iter] = 0;
+    }
     delayLoop(1000);
   }
 

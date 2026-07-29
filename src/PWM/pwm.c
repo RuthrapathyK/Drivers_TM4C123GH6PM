@@ -23,10 +23,10 @@ void PWM_Init(void)
     /* PWM Timer configuration */
     REG_WRITE(PWM0->_0_CTL, 0, 1, 1);      // Select Count Down mode
     REG_WRITE(PWM0->_0_CTL, 1, 2, 1);      // Counter Always run when in Debug Mode also
-    REG_WRITE(PWM0->_0_LOAD, 142, 0, 16); // Load Value
+    REG_WRITE(PWM0->_0_LOAD, 684, 0, 16); // Load Value
 
     /* PWM Comparator configuration */
-    REG_WRITE(PWM0->_0_CMPA, 64, 0, 16); // Comparartor A value
+    REG_WRITE(PWM0->_0_CMPA, 344, 0, 16); // Comparartor A value
     REG_WRITE(PWM0->_0_CMPB, 18000, 0, 16); //Comparartor B value - Trigger will not occur
 
 
@@ -51,6 +51,6 @@ void PWM_Init(void)
     /* PWM Output Control Logic Configuration */
     REG_WRITE(PWM0->ENABLE, 1, 0, 1); // PWM0A signal is passed to the Pin
 
-    /* Enable the PWM Generator */
-    REG_WRITE(PWM0->_0_CTL, 1, 0, 1);
+    /* Disable the PWM Generator so that it can be enabled when ADC needs to be triggered */
+    REG_WRITE(PWM0->_0_CTL, 0, 0, 1);
 }

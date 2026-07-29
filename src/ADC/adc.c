@@ -159,7 +159,7 @@ void ADC_Init(ADC_Module_e mod)
     /* Disable ADC Interrupt Mask as DMA will generate Interrupt of this ADC peripheral */
     REG_WRITE(adc_base->IM, 0, 0, 1);
 
-    /* Enable SS0 Sample Sequencer to Wait for Timer to Trigger the Conversion */
+    /* Enable SS0 Sample Sequencer to Wait for PWM to Trigger the Conversion */
     REG_WRITE(adc_base->ACTSS, 1, 0, 1);
 }
 

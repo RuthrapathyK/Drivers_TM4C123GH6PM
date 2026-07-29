@@ -2,6 +2,9 @@
 #include "common.h"
 #include "../src/NVIC/nvic.h"
 
+#define DELAY_LOOP_CYCLES_PER_ITERATION 10
+#define DELAY_FREQ_1KHZ 1000
+
 /**
  * @brief Writes bits at a specified position in a register.
  *
@@ -107,7 +110,7 @@ void delayLoop(uint32_t mSec)
 {
   for (volatile uint32_t i = 0; i < mSec ; i++)
   {
-    for(volatile uint32_t j =0; j < 1000; j++)
+    for(volatile uint32_t j =0; j < SYSTEM_CLOCK_FREQ / (DELAY_LOOP_CYCLES_PER_ITERATION * DELAY_FREQ_1KHZ); j++)
     {
       __asm("NOP");
     }
