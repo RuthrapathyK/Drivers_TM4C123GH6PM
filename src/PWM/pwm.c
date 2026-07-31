@@ -1,5 +1,7 @@
 #include "pwm.h"
 
+#define EXPECTED_TIMER_NS   64563
+
 void PWM_Init(void)
 {
     /* Reset the PWM module - 0*/
@@ -23,10 +25,11 @@ void PWM_Init(void)
     /* PWM Timer configuration */
     REG_WRITE(PWM0->_0_CTL, 0, 1, 1);      // Select Count Down mode
     REG_WRITE(PWM0->_0_CTL, 1, 2, 1);      // Counter Always run when in Debug Mode also
-    REG_WRITE(PWM0->_0_LOAD, 684, 0, 16); // Load Value
+    REG_WRITE(PWM0->_0_LOAD, (uint32_t)(((uint64_t)SYSTEM_CLOCK_FREQ * (uint64_t)EXPECTED_TIMER_NS) / (uint64_t)1000000000) - 1, 0, 16); // Load Value
+//    REG_WRITE(PWM0->_0_LOAD, 5163, 0, 16); // Load Value
 
     /* PWM Comparator configuration */
-    REG_WRITE(PWM0->_0_CMPA, 344, 0, 16); // Comparartor A value
+    REG_WRITE(PWM0->_0_CMPA, 100, 0, 16); // Comparartor A value
     REG_WRITE(PWM0->_0_CMPB, 18000, 0, 16); //Comparartor B value - Trigger will not occur
 
 

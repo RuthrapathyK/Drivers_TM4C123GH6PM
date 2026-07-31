@@ -15,6 +15,8 @@
 
 #define RTOS_ENABLED ENABLED
 
+//#define CONTINUOUS_TRIGGER_ENABLE 1
+#define PWM_TRIGGER_ENABLE 1
 /************************************** RTOS ****************************************************** */
 #define PENDSV_TRIGGER  SCB->INTCTRL |= 1<<28
 #define PENDSV_CLEAR    SCB->INTCTRL |= 1<<27

@@ -57,14 +57,15 @@ void Peripheral_Init(void)
   UART_Init(UART_0, &UART0_Handler);
 
   /* Init ADC */
- ADC_Init(ADC_0);
+  ADC_Init(ADC_0);
 
   /* Init DMA */
- DMA_Init(DMA_0);
+  DMA_Init(DMA_0);
 
+ #ifdef PWM_TRIGGER_ENABLE
   /* Init Timer */
   PWM_Init();
-
+#endif
   /* Init Test Pin */
   GPIO_Init(PF1, GPIO_DigitalOutput, GPIO_State_OFF);
 }
@@ -139,13 +140,16 @@ int main()
 
     /* Enable DMA transfers */
     DMA_EnableTransfer(DMA_0);
-
+#ifdef PWM_TRIGGER_ENABLE
     /* Reset the PWM0 timer count */
     REG_WRITE(PWM0->SYNC, 1, 0, 1);
 
     /* Enable PWM to Start the Conversion - Counter will not restart on every trigger */
     REG_SET_BIT(PWM0->_0_CTL, 0);
-    
+#endif 
+#ifdef CONTINUOUS_TRIGGER_ENABLE
+    REG_SET_BIT(ADC0->ACTSS, 0);
+#endif
     /* Wait till Configured No of Conversions are completed */
     while(!isTransferDone)
     ;
@@ -162,7 +166,7 @@ int main()
       UART_sendString_NonBlocking(&UART_TX_QHandler,";");
       adc_val[iter] = 0;
     }
-    delayLoop(1000);
+    //delayLoop(1000);
   }
 
   return 0;
