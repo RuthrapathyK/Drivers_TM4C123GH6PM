@@ -126,10 +126,10 @@ void ADC_Init(ADC_Module_e mod)
     ADC0_Type *adc_base = ADC_getBase(mod);
 
     /* Configure Clock Source for ADC Module */
-    REG_WRITE(adc_base->CC, ADC_ClockSource_PIOSC, 0, 4);
+    REG_WRITE(adc_base->CC, ADC_ClockSource_Either, 0, 4);
     
     /* Configure Sampling Rate of the ADC Module */
-    REG_WRITE(adc_base->PC, ADC_SampleRate_125ksps, 0, 4);
+    REG_WRITE(adc_base->PC, ADC_SampleRate_1000ksps, 0, 4);
 
     /* Enable Dither */
     REG_WRITE(adc_base->CTL, ADC_Dither_Enable, 6, 1);

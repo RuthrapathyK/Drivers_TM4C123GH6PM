@@ -135,8 +135,8 @@ int main()
     isTransferDone = false;
     ProcessedSample_Count = 0;
 
-    /* Flush the FIFO so that unread data will not cause Overflow */
-    ADC_FlushFIFO(ADC_SampleSequencer_0);
+    /* ReInit ADC to Flush the FIFO and exit the ADC from Continuous sampling mode */
+    ADC_Init(ADC_0);
 
     /* Enable DMA transfers */
     DMA_EnableTransfer(DMA_0);
@@ -152,10 +152,10 @@ int main()
 #endif
     /* Wait till Configured No of Conversions are completed */
     while(!isTransferDone)
-    ;
-
-    /* Check any Underflow or Overflow has happened in the Sample collection */
-    ADC_SynchronizationCheck();
+    {
+      /* Check any Underflow or Overflow has happened in the Sample collection */
+      ADC_SynchronizationCheck();
+    }
     
     GPIO_clearPin(PF1);
 
