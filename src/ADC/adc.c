@@ -2,11 +2,13 @@
 #include "../src/DMA/dma.h"
 #include "../src/UART/uart.h"
 
-extern uint16_t adc_val[MAX_ADC_SAMPLE_SIZE];
+extern uint16_t adc0_val[MAX_ADC_SAMPLE_SIZE];
+extern uint16_t adc1_val[MAX_ADC_SAMPLE_SIZE];
 extern volatile bool isTransferDone;
 extern DMA_ControlWord_t ControlWord;
 extern DMA_ChannelControl_t Channel_Control_Table[DMA_ChannelControl_Max][DMA_Channel_Max];
-uint32_t volatile ProcessedSample_Count = 0;
+uint32_t volatile ADC0_SmpCnt = 0;
+uint32_t volatile ADC1_SmpCnt = 0;
 
 /**
  * @brief Gets the base address of the specified ADC module.
@@ -52,7 +54,7 @@ void ADC0_Sequence_0_handler(void)
     /* Clear Interrupt */
     REG_SET_BIT(ADC0->ISC, 0); // Direct Register write is needed to achieve the Maximum Sampling Rate
 
-    if(ProcessedSample_Count >= MAX_ADC_SAMPLE_SIZE)
+    if(ADC0_SmpCnt >= MAX_ADC_SAMPLE_SIZE)
     {
         if((Channel_Control_Table[DMA_ChannelControl_Primary][DMA_Channel_14].Control_Word.XFERSIZE == 0) && (Channel_Control_Table[DMA_ChannelControl_Secondary][DMA_Channel_14].Control_Word.XFERSIZE == 0))
         {
@@ -64,7 +66,48 @@ void ADC0_Sequence_0_handler(void)
                 /* Disable ADC to Stop the Conversion */
                 REG_CLEAR_BIT(ADC0->ACTSS, 0); // Direct Register write is needed to achieve the Maximum Sampling Rate 
             #endif
+        }
+        else
+        {
+            /* Wait till all the Scheduled DMA transfers are completed */
+        }
+    }
+    else
+    {
+        if((MAX_ADC_SAMPLE_SIZE - ADC0_SmpCnt) > DMA_MAX_XFER_COUNT)
+        {
+            ControlWord.XFERSIZE = DMA_MAX_XFER_COUNT - 1;
 
+            if(Channel_Control_Table[DMA_ChannelControl_Primary][DMA_Channel_14].Control_Word.XFERSIZE == 0)
+                DMA_ChannelConfig(DMA_ChannelControl_Primary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc0_val[ADC0_SmpCnt + ControlWord.XFERSIZE], ControlWord);
+            else if(Channel_Control_Table[DMA_ChannelControl_Secondary][DMA_Channel_14].Control_Word.XFERSIZE == 0)
+                DMA_ChannelConfig(DMA_ChannelControl_Secondary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc0_val[ADC0_SmpCnt + ControlWord.XFERSIZE], ControlWord);
+
+            ADC0_SmpCnt += DMA_MAX_XFER_COUNT;
+        }
+        else
+        {
+            ControlWord.XFERSIZE = MAX_ADC_SAMPLE_SIZE - ADC0_SmpCnt - 1;
+
+            if(Channel_Control_Table[DMA_ChannelControl_Primary][DMA_Channel_14].Control_Word.XFERSIZE == 0)
+                DMA_ChannelConfig(DMA_ChannelControl_Primary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc0_val[ADC0_SmpCnt + ControlWord.XFERSIZE], ControlWord);
+            else if(Channel_Control_Table[DMA_ChannelControl_Secondary][DMA_Channel_14].Control_Word.XFERSIZE == 0)
+                DMA_ChannelConfig(DMA_ChannelControl_Secondary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc0_val[ADC0_SmpCnt + ControlWord.XFERSIZE], ControlWord);
+
+            ADC0_SmpCnt += (ControlWord.XFERSIZE + 1);  
+        }
+    }
+}
+
+void ADC1_Sequence_0_handler(void)
+{
+    /* Clear Interrupt */
+    REG_SET_BIT(ADC1->ISC, 0); // Direct Register write is needed to achieve the Maximum Sampling Rate
+
+    if(ADC1_SmpCnt >= MAX_ADC_SAMPLE_SIZE)
+    {
+        if((Channel_Control_Table[DMA_ChannelControl_Primary][DMA_Channel_24].Control_Word.XFERSIZE == 0) && (Channel_Control_Table[DMA_ChannelControl_Secondary][DMA_Channel_24].Control_Word.XFERSIZE == 0))
+        {
             isTransferDone = true;
         }
         else
@@ -74,27 +117,27 @@ void ADC0_Sequence_0_handler(void)
     }
     else
     {
-        if((MAX_ADC_SAMPLE_SIZE - ProcessedSample_Count) > DMA_MAX_XFER_COUNT)
+        if((MAX_ADC_SAMPLE_SIZE - ADC1_SmpCnt) > DMA_MAX_XFER_COUNT)
         {
             ControlWord.XFERSIZE = DMA_MAX_XFER_COUNT - 1;
 
-            if(Channel_Control_Table[DMA_ChannelControl_Primary][DMA_Channel_14].Control_Word.XFERSIZE == 0)
-                DMA_ChannelConfig(DMA_ChannelControl_Primary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[ProcessedSample_Count + ControlWord.XFERSIZE], ControlWord);
-            else if(Channel_Control_Table[DMA_ChannelControl_Secondary][DMA_Channel_14].Control_Word.XFERSIZE == 0)
-                DMA_ChannelConfig(DMA_ChannelControl_Secondary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[ProcessedSample_Count + ControlWord.XFERSIZE], ControlWord);
+            if(Channel_Control_Table[DMA_ChannelControl_Primary][DMA_Channel_24].Control_Word.XFERSIZE == 0)
+                DMA_ChannelConfig(DMA_ChannelControl_Primary, DMA_Channel_24, (uint32_t *)&ADC1->SSFIFO0, (uint32_t *)&adc1_val[ADC1_SmpCnt + ControlWord.XFERSIZE], ControlWord);
+            else if(Channel_Control_Table[DMA_ChannelControl_Secondary][DMA_Channel_24].Control_Word.XFERSIZE == 0)
+                DMA_ChannelConfig(DMA_ChannelControl_Secondary, DMA_Channel_24, (uint32_t *)&ADC1->SSFIFO0, (uint32_t *)&adc1_val[ADC1_SmpCnt + ControlWord.XFERSIZE], ControlWord);
 
-            ProcessedSample_Count += DMA_MAX_XFER_COUNT;
+            ADC1_SmpCnt += DMA_MAX_XFER_COUNT;
         }
         else
         {
-            ControlWord.XFERSIZE = MAX_ADC_SAMPLE_SIZE - ProcessedSample_Count - 1;
+            ControlWord.XFERSIZE = MAX_ADC_SAMPLE_SIZE - ADC1_SmpCnt - 1;
 
-            if(Channel_Control_Table[DMA_ChannelControl_Primary][DMA_Channel_14].Control_Word.XFERSIZE == 0)
-                DMA_ChannelConfig(DMA_ChannelControl_Primary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[ProcessedSample_Count + ControlWord.XFERSIZE], ControlWord);
-            else if(Channel_Control_Table[DMA_ChannelControl_Secondary][DMA_Channel_14].Control_Word.XFERSIZE == 0)
-                DMA_ChannelConfig(DMA_ChannelControl_Secondary, DMA_Channel_14, (uint32_t *)&ADC0->SSFIFO0, (uint32_t *)&adc_val[ProcessedSample_Count + ControlWord.XFERSIZE], ControlWord);
+            if(Channel_Control_Table[DMA_ChannelControl_Primary][DMA_Channel_24].Control_Word.XFERSIZE == 0)
+                DMA_ChannelConfig(DMA_ChannelControl_Primary, DMA_Channel_24, (uint32_t *)&ADC1->SSFIFO0, (uint32_t *)&adc1_val[ADC1_SmpCnt + ControlWord.XFERSIZE], ControlWord);
+            else if(Channel_Control_Table[DMA_ChannelControl_Secondary][DMA_Channel_24].Control_Word.XFERSIZE == 0)
+                DMA_ChannelConfig(DMA_ChannelControl_Secondary, DMA_Channel_24, (uint32_t *)&ADC1->SSFIFO0, (uint32_t *)&adc1_val[ADC1_SmpCnt + ControlWord.XFERSIZE], ControlWord);
 
-            ProcessedSample_Count += (ControlWord.XFERSIZE + 1);  
+            ADC1_SmpCnt += (ControlWord.XFERSIZE + 1);  
         }
     }
 }
@@ -109,7 +152,7 @@ void ADC0_Sequence_0_handler(void)
  *
  * @param mod The ADC module to initialize
  */
-void ADC_Init(ADC_Module_e mod)
+void ADC_Init(ADC_Module_e mod, ADC_PhaseLag_e phase)
 {
     /* Reset the ADC module */
     RegWrite_Bits_ASSERT(&SYSCTL->SRADC, 1, mod, 1);
@@ -167,12 +210,17 @@ void ADC_Init(ADC_Module_e mod)
     REG_WRITE(adc_base->SSMUX0, ADC_SampleInput_AIN5, 24, 4); // 7th Sample
     REG_WRITE(adc_base->SSMUX0, ADC_SampleInput_AIN5, 28, 4); // 8th Sample
 
+    /* Configure the Phase Lag from the Trigger */
+    RegWrite_Bits(&adc_base->SPC, phase, 0, 4);
+
     /* Disable ADC Interrupt Mask as DMA will generate Interrupt of this ADC peripheral */
     REG_WRITE(adc_base->IM, 0, 0, 1);
+
 #ifdef PWM_TRIGGER_ENABLE
     /* Enable SS0 Sample Sequencer to Wait for PWM to Trigger the Conversion */
     REG_WRITE(adc_base->ACTSS, 1, 0, 1);
 #endif
+
 #ifdef CONTINUOUS_TRIGGER_ENABLE
     /* Disable SS0 Sample Sequencer */
     REG_WRITE(adc_base->ACTSS, 0, 0, 1);

@@ -18,10 +18,12 @@ Queue_t UART_TX_QHandler;
 
 UART_config_t UART0_Handler;
 
-uint16_t adc_val[MAX_ADC_SAMPLE_SIZE] = {0};
+uint16_t adc0_val[MAX_ADC_SAMPLE_SIZE] = {0};
+uint16_t adc1_val[MAX_ADC_SAMPLE_SIZE] = {0};
 volatile bool isTransferDone = false;
 
-extern uint32_t volatile ProcessedSample_Count;
+extern uint32_t volatile ADC0_SmpCnt;
+extern uint32_t volatile ADC1_SmpCnt;
 
 uint32_t test[3] = {0,};
 /**
@@ -57,7 +59,8 @@ void Peripheral_Init(void)
   UART_Init(UART_0, &UART0_Handler);
 
   /* Init ADC */
-  ADC_Init(ADC_0);
+  ADC_Init(ADC_0, ADC_PhaseLag_0_0);
+  ADC_Init(ADC_1, ADC_PhaseLag_180_0);
 
   /* Init DMA */
   DMA_Init(DMA_0);
@@ -98,6 +101,7 @@ void Interrupt_Init(void)
   /* Enable NVIC peripheral Interrupt */
   NVIC_enableInterrupt(UART_0_IRQ);
   NVIC_enableInterrupt(ADC_0_SEQ_0_IRQ);
+  NVIC_enableInterrupt(ADC_1_SEQ_0_IRQ);
   NVIC_enableInterrupt(TIMER_0A_IRQ);
 
   /* Enable Global Interrupt of the Processor */
@@ -133,10 +137,12 @@ int main()
 
     /* Clear Counter */
     isTransferDone = false;
-    ProcessedSample_Count = 0;
+    ADC0_SmpCnt = 0;
+    ADC1_SmpCnt = 0;
 
     /* ReInit ADC to Flush the FIFO and exit the ADC from Continuous sampling mode */
-    ADC_Init(ADC_0);
+    ADC_Init(ADC_0, ADC_PhaseLag_0_0);
+    ADC_Init(ADC_1, ADC_PhaseLag_180_0);
 
     /* Enable DMA transfers */
     DMA_EnableTransfer(DMA_0);
@@ -154,7 +160,7 @@ int main()
     while(!isTransferDone)
     {
       /* Check any Underflow or Overflow has happened in the Sample collection */
-      ADC_SynchronizationCheck();
+      //ADC_SynchronizationCheck();
     }
     
     GPIO_clearPin(PF1);
@@ -162,11 +168,15 @@ int main()
     for(uint32_t iter = 0; iter < MAX_ADC_SAMPLE_SIZE; iter++)
     {
       UART_sendString_NonBlocking(&UART_TX_QHandler, "$$P-,");
-      UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc_val[iter]);
+      UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc0_val[iter]);
       UART_sendString_NonBlocking(&UART_TX_QHandler,";");
-      adc_val[iter] = 0;
+      adc0_val[iter] = 0;
+      UART_sendString_NonBlocking(&UART_TX_QHandler, "$$P-,");
+      UART_sendNumber_NonBlocking(&UART_TX_QHandler, (int32_t)adc1_val[iter]);
+      UART_sendString_NonBlocking(&UART_TX_QHandler,";");
+      adc1_val[iter] = 0;
     }
-    //delayLoop(1000);
+    delayLoop(1000);
   }
 
   return 0;

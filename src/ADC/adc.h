@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-#define MAX_ADC_SAMPLE_SIZE 10000
+#define MAX_ADC_SAMPLE_SIZE 5000
 
 typedef enum{
     ADC_0 = 0,
@@ -80,7 +80,26 @@ typedef enum{
     ADC_Dither_Enable = 1
 }ADC_DitherSetting_e;
 
-void ADC_Init(ADC_Module_e mod);
+typedef enum{
+    ADC_PhaseLag_0_0 = 0x0,
+    ADC_PhaseLag_22_5 = 0x1,
+    ADC_PhaseLag_45_0 = 0x2,
+    ADC_PhaseLag_67_5 = 0x3,
+    ADC_PhaseLag_90_0 = 0x4,
+    ADC_PhaseLag_112_5 = 0x5,
+    ADC_PhaseLag_135_0 = 0x6,
+    ADC_PhaseLag_157_5 = 0x7,
+    ADC_PhaseLag_180_0 = 0x8,
+    ADC_PhaseLag_202_5 = 0x9,
+    ADC_PhaseLag_225_0 = 0xA,
+    ADC_PhaseLag_247_5 = 0xB,
+    ADC_PhaseLag_270_0 = 0xC,
+    ADC_PhaseLag_292_5 = 0xD,
+    ADC_PhaseLag_315_0 = 0xE,
+    ADC_PhaseLag_337_5 = 0xF,
+}ADC_PhaseLag_e;
+
+void ADC_Init(ADC_Module_e mod, ADC_PhaseLag_e phase);
 uint16_t ADC_ReadRaw(ADC_Module_e mod);
 void ADC_TriggerConversion(ADC_Module_e mod);
 void ADC_SynchronizationCheck(void);
